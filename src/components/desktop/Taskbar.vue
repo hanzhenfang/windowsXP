@@ -6,10 +6,12 @@ import WindowsLogo from "@/assets/windowsXP.png"
 import ShieldIcon from "@/assets/systemIcon/安全卫士.ico"
 import NetworkIcon from "@/assets/systemIcon/网络邻居.ico"
 import StartMenu from "./StartMenu.vue"
+import { useSystemStore } from "@/store/systemStore"
 
 const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void }>()
 const windows = useWindowStore()
 const root = useRootStore()
+const system = useSystemStore()
 const isStartOpen = ref(false)
 const now = ref(new Date())
 const isMobile = computed(() => root.isMobile)
@@ -50,7 +52,10 @@ function toggleTaskWindow(id: string) {
     </div>
     <div class="xp-tray" title="系统托盘">
       <img :src="ShieldIcon" alt="安全中心" />
-      <img :src="NetworkIcon" alt="网络连接" />
+      <button class="xp-network-tray-button" :aria-label="system.networkConnected ? '网络已连接' : '网络已断开'" :title="system.networkConnected ? '本地连接：已连接' : '本地连接：网络电缆被拔出'" @click="windows.open('network-connections')">
+        <img v-if="system.networkConnected" class="xp-network-status-icon" :src="NetworkIcon" alt="" />
+        <span v-else class="xp-network-status-disconnected" aria-hidden="true">⛔</span>
+      </button>
       <time>{{ timeText }}</time>
     </div>
   </div>

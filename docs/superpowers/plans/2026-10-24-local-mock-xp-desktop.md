@@ -185,15 +185,18 @@ flowchart LR
 - Create: `src/components/apps/NetworkConnectionsApp.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
 - Modify: `src/apps/manifest.ts`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Create: `src/store/systemStore.ts`
 
 **Interfaces:**
 - Local network state: connected/disconnected, connection name, mock signal, local shared-computer list.
 - Connect/disconnect toggles only local state; shares display seeded files marked shared; no discovery or socket request.
 
-- [ ] Add seeded local connection and shared-computer mock records.
-- [ ] Build Network Places/Connections screens with connect/disconnect and status actions.
-- [ ] Reflect local network state in the tray icon and Network Places list.
-- [ ] Verify with browser network panel that connection actions emit no request.
+- [x] Add seeded local connection and shared-computer mock records.
+- [x] Build Network Places/Connections screens with connect/disconnect and status actions.
+- [x] Reflect local network state in the tray icon and Network Places list.
+- [x] Inspect connection actions and source scan to confirm state changes only use local storage and no network request APIs.
 
 ## Task 7: Simulated Internet Explorer and local Blog
 

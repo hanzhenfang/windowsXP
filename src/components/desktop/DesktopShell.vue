@@ -28,7 +28,7 @@ const selectedApp = computed(() => contextMenu.value?.appId ? desktopApps.find((
 const selectedFolder = computed(() => contextMenu.value?.folderId ? filesystem.entryById(contextMenu.value.folderId) : undefined)
 const sortedApps = computed(() => {
   const hidden = new Set(desktop.shortcuts.hidden)
-  const visible = desktopApps.filter((app) => !hidden.has(app.id)).map((app) => ({ ...app, title: desktop.shortcuts.titles[app.id] ?? app.title }))
+  const visible = desktopApps.filter((app) => app.desktopVisible !== false && !hidden.has(app.id)).map((app) => ({ ...app, title: desktop.shortcuts.titles[app.id] ?? app.title }))
   return desktop.sortAlphabetically ? visible.sort((a, b) => a.title.localeCompare(b.title, "zh-CN")) : visible
 })
 const desktopFolders = computed(() => filesystem.childrenOf("desktop-folder").filter((entry) => entry.kind === "folder"))
