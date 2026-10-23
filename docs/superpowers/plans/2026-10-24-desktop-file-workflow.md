@@ -107,9 +107,9 @@
 - `restoreLocalBackup(backup): void` writes all storage keys only after validation; storage failure rolls back previous key values.
 - Control Panel provides Export and Import buttons using browser local file input/download; media preview shows native image/audio/text controls plus file type/size/date.
 
-- [ ] Write and run failing tests `roundTripsAllLocalStores`, `rejectsUnknownBackupVersion`, `rejectsDuplicateFilesystemIds`, `rejectsMissingParent`, and `invalidImportDoesNotChangeStorage`.
-- [ ] Implement normalized export/import adapter and connect local file picker/download controls.
-- [ ] Improve media preview metadata and controls; run backup tests and production build; commit `feat: add local backup and richer previews`.
+- [x] Write and run failing tests `roundTripsAllLocalStores`, `rejectsUnknownBackupVersion`, `rejectsDuplicateFilesystemIds`, `rejectsMissingParent`, and `invalidImportDoesNotChangeStorage`.
+- [x] Implement normalized export/import adapter and connect local file picker/download controls.
+- [x] Improve media preview metadata and controls; run backup tests and production build; commit `feat: add local backup and richer previews`.
 
 ## Task 6: Accessibility, responsive behavior, and regression completion
 

@@ -2,7 +2,7 @@ import { defineStore } from "pinia"
 import { getDesktopApp } from "@/apps/manifest"
 import { normalizeDesktopPosition, safeDesktopPreferences, type DesktopPreferences } from "@/mocks/desktop/preferences"
 
-const STORAGE_KEY = "windows-xp-mock:desktop-shortcuts"
+export const DESKTOP_STORAGE_KEY = "windows-xp-mock:desktop-shortcuts"
 const protectedShortcuts = new Set(["computer", "recycle", "network"])
 
 export const useDesktopStore = defineStore("desktop", {
@@ -14,8 +14,9 @@ export const useDesktopStore = defineStore("desktop", {
   }),
   actions: {
     persist() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.shortcuts)) } catch { /* Keep the current desktop usable if storage is blocked. */ }
+      try { localStorage.setItem(DESKTOP_STORAGE_KEY, JSON.stringify(this.shortcuts)) } catch { /* Keep the current desktop usable if storage is blocked. */ }
     },
+    reload() { this.shortcuts = safeDesktopPreferences() },
     renameShortcut(id: string, title: string) {
       const safeTitle = title.trim()
       if (!safeTitle || safeTitle.length > 64) throw new Error("名称需为 1 至 64 个字符。")

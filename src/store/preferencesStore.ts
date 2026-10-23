@@ -1,11 +1,11 @@
 import { defineStore } from "pinia"
 
-const STORAGE_KEY = "windows-xp-mock:preferences"
+export const PREFERENCES_STORAGE_KEY = "windows-xp-mock:preferences"
 export type WallpaperId = "deskbg" | "desktop-background"
 export type ThemeColor = "blue" | "olive" | "silver"
 export type IconSize = "large" | "small"
 export interface BrowserTabPreference { id: string; address: string; history: string[]; historyIndex: number }
-interface PreferencesSnapshot {
+export interface PreferencesSnapshot {
   version: 1
   browserFavorites: string[]
   browserTabs: BrowserTabPreference[]
@@ -30,10 +30,10 @@ const defaults: PreferencesSnapshot = {
   themeColor: "blue",
 }
 
-function loadPreferences(): PreferencesSnapshot {
+export function loadPreferencesSnapshot(): PreferencesSnapshot {
   const fallback = { ...defaults, browserFavorites: defaultFavorites.slice(), browserTabs: defaultBrowserTabs.map((tab) => ({ ...tab, history: tab.history.slice() })) }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY)
     if (!raw) return fallback
     const value = JSON.parse(raw) as Partial<PreferencesSnapshot>
     if (value.version !== 1) return fallback
@@ -67,7 +67,7 @@ function sanitizeBrowserTabs(value: unknown): BrowserTabPreference[] | undefined
 }
 
 export const usePreferencesStore = defineStore("preferences", {
-  state: () => ({ snapshot: loadPreferences() }),
+  state: () => ({ snapshot: loadPreferencesSnapshot() }),
   getters: {
     browserFavorites: (state) => state.snapshot.browserFavorites,
     browserTabs: (state) => state.snapshot.browserTabs,
@@ -80,8 +80,9 @@ export const usePreferencesStore = defineStore("preferences", {
   },
   actions: {
     persist() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.snapshot)) } catch { /* Preferences remain usable for this session if storage is blocked. */ }
+      try { localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(this.snapshot)) } catch { /* Preferences remain usable for this session if storage is blocked. */ }
     },
+    reload() { this.snapshot = loadPreferencesSnapshot() },
     addBrowserFavorite(address: string) {
       if (!this.snapshot.browserFavorites.includes(address)) this.snapshot.browserFavorites.push(address)
       this.persist()

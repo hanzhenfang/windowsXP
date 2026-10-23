@@ -159,6 +159,14 @@ function setSort(key: "name" | "type" | "size" | "modifiedAt") {
   if (sortKey.value === key) sortAscending.value = !sortAscending.value
   else { sortKey.value = key; sortAscending.value = true }
 }
+function formatPreviewSize(size: number) {
+  if (size < 1024) return `${size} 字节`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+function formatPreviewDate(timestamp: number) {
+  return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(timestamp)
+}
 function onExplorerKeyDown(event: KeyboardEvent) {
   if (event.target instanceof HTMLElement && (event.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName))) return
   if (dialog.value.visible) return
@@ -221,6 +229,11 @@ watch(() => props.initialFolderId, (id) => { if (id) navigateTo(id) })
       <section class="xp-file-preview" role="dialog" aria-modal="true" :aria-label="previewEntry.name">
         <header><b>{{ previewEntry.name }}</b><button aria-label="关闭" @click="previewEntry = null">×</button></header>
         <main>
+          <dl class="xp-file-preview-metadata">
+            <div><dt>类型</dt><dd>{{ previewEntry.kind === 'folder' ? '文件夹' : previewEntry.type }}</dd></div>
+            <div><dt>大小</dt><dd>{{ formatPreviewSize(previewEntry.size) }}</dd></div>
+            <div><dt>修改日期</dt><dd>{{ formatPreviewDate(previewEntry.modifiedAt) }}</dd></div>
+          </dl>
           <img v-if="previewEntry.type.startsWith('image/') && previewEntry.assetUrl" :src="previewEntry.assetUrl" :alt="previewEntry.name" />
           <audio v-else-if="previewEntry.type.startsWith('audio/') && previewEntry.assetUrl" :src="previewEntry.assetUrl" controls preload="metadata"></audio>
           <pre v-else>{{ previewEntry.content ?? '没有可预览的本地内容。' }}</pre>

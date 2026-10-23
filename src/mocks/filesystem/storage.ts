@@ -34,7 +34,7 @@ function isEntry(value: unknown): value is MockEntry {
     typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt) && hasValidDeletedAt
 }
 
-function isValidSnapshot(value: unknown): value is FilesystemSnapshot {
+export function validateFilesystemSnapshot(value: unknown): value is FilesystemSnapshot {
   if (!value || typeof value !== "object") return false
   const snapshot = value as Partial<FilesystemSnapshot>
   if (snapshot.version !== 1 || !Array.isArray(snapshot.entries) || !Array.isArray(snapshot.recycleBin)) return false
@@ -44,8 +44,21 @@ function isValidSnapshot(value: unknown): value is FilesystemSnapshot {
   if (ids.size !== all.length) return false
   const activeIds = new Set(snapshot.entries.map((entry) => entry.id))
   const recycledIds = new Set(snapshot.recycleBin.map((entry) => entry.id))
-  return snapshot.entries.every((entry) => entry.parentId === null || activeIds.has(entry.parentId)) &&
-    snapshot.recycleBin.every((entry) => entry.parentId === null || recycledIds.has(entry.parentId) || activeIds.has(entry.parentId))
+  const entriesById = new Map(snapshot.entries.map((entry) => [entry.id, entry]))
+  const activeTreeValid = snapshot.entries.every((entry) => {
+    if (entry.parentId === null) return true
+    const parent = entriesById.get(entry.parentId)
+    if (!parent || parent.kind !== "folder") return false
+    const seen = new Set<string>([entry.id])
+    let current: MockEntry | undefined = parent
+    while (current) {
+      if (seen.has(current.id)) return false
+      seen.add(current.id)
+      current = current.parentId ? entriesById.get(current.parentId) : undefined
+    }
+    return true
+  })
+  return activeTreeValid && snapshot.recycleBin.every((entry) => entry.parentId === null || recycledIds.has(entry.parentId) || activeIds.has(entry.parentId))
 }
 
 function persist(snapshot: FilesystemSnapshot) {
@@ -62,7 +75,7 @@ export function loadFilesystemSnapshot(): FilesystemSnapshot {
     const raw = storage.getItem(FILESYSTEM_STORAGE_KEY)
     if (raw) {
       const parsed: unknown = JSON.parse(raw)
-      if (isValidSnapshot(parsed)) return parsed
+      if (validateFilesystemSnapshot(parsed)) return parsed
     }
   } catch {
     // Corrupt JSON falls back to a clean local seed.

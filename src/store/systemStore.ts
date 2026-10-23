@@ -1,10 +1,10 @@
 import { defineStore } from "pinia"
 
-const STORAGE_KEY = "windows-xp-mock:system"
+export const SYSTEM_STORAGE_KEY = "windows-xp-mock:system"
 interface SharedFile { id: string; name: string; type: string; content: string }
 interface SharedFolder { id: string; name: string; files: SharedFile[] }
 interface SharedComputer { id: string; name: string; description: string; shares: SharedFolder[] }
-interface SystemSnapshot {
+export interface SystemSnapshot {
   version: 1
   network: { connected: boolean }
 }
@@ -30,10 +30,10 @@ const sharedComputers: SharedComputer[] = [
   },
 ]
 
-function loadSystemSnapshot(): SystemSnapshot {
+export function loadSystemSnapshot(): SystemSnapshot {
   const fallback: SystemSnapshot = { version: 1, network: { connected: true } }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(SYSTEM_STORAGE_KEY)
     if (!raw) return fallback
     const value = JSON.parse(raw) as Partial<SystemSnapshot>
     if (value.version !== 1 || !value.network || typeof value.network.connected !== "boolean") return fallback
@@ -52,8 +52,9 @@ export const useSystemStore = defineStore("system", {
   },
   actions: {
     persist() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.snapshot)) } catch { /* Keep local network actions usable if storage is unavailable. */ }
+      try { localStorage.setItem(SYSTEM_STORAGE_KEY, JSON.stringify(this.snapshot)) } catch { /* Keep local network actions usable if storage is unavailable. */ }
     },
+    reload() { this.snapshot = loadSystemSnapshot() },
     connect() { this.snapshot.network.connected = true; this.persist() },
     disconnect() { this.snapshot.network.connected = false; this.persist() },
     toggleConnection() { this.snapshot.network.connected = !this.snapshot.network.connected; this.persist() },
