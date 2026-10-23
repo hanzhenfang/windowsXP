@@ -3,8 +3,7 @@ import { computed, onBeforeUnmount, onMounted } from "vue"
 import { useRootStore } from "@/store/rootStore"
 import { storeToRefs } from "pinia"
 
-import PCDeskTop from "@/pages/DeskTop/PCDeskTop/index.vue"
-import MobileDeskTop from "@/pages/DeskTop/MobileDeskTop/index.vue"
+import DesktopShell from "@/components/desktop/DesktopShell.vue"
 
 
 const rootStore = useRootStore()
@@ -16,9 +15,9 @@ onMounted(() => {
   stopResizeListener = rootStore.initStore()
 })
 
-const desktopComponent = computed(() => isMobile.value ? MobileDeskTop : PCDeskTop)
+const isMobileLayout = computed(() => isMobile.value)
 onBeforeUnmount(() => stopResizeListener?.())
 </script>
 <template>
-  <Component :is="desktopComponent" />
+  <DesktopShell :mobile="isMobileLayout" />
 </template>

@@ -34,7 +34,7 @@
 ## Module Map
 
 - `src/mocks/`: mock data schema, seed data, local persistence adapter, and file-operation service.
-- `src/stores/`: Pinia state for filesystem, desktop preferences, power state, and windows; stores call mock services rather than embedding file mutation logic.
+- `src/store/`: Pinia state for filesystem, desktop preferences, power state, and windows; stores call mock services rather than embedding file mutation logic. This follows the repository's existing singular directory convention.
 - `src/apps/`: application manifest, local route catalog, and app-specific view components.
 - `src/components/desktop/`: shell, icons, context menus, Start menu, taskbar, tray and desktop selection state.
 - `src/components/window/`: XP title bar, window frame, controls, resize/drag behavior and mobile full-screen frame.
@@ -66,7 +66,7 @@ flowchart LR
 - Create: `src/mocks/filesystem/seed.ts`
 - Create: `src/mocks/filesystem/storage.ts`
 - Create: `src/mocks/filesystem/service.ts`
-- Create: `src/stores/filesystemStore.ts`
+- Create: `src/store/filesystemStore.ts`
 - Modify: `src/apps/manifest.ts`
 
 **Interfaces:**
@@ -95,8 +95,10 @@ flowchart LR
 - Create: `src/components/desktop/Taskbar.vue`
 - Modify: `src/pages/DeskTop/index.vue`
 - Modify: `src/pages/DeskTop/IconGroup/index.vue`
-- Modify: `src/pages/DeskTop/Footer/index.vue`
 - Modify: `src/global.css`
+- Remove: `src/pages/DeskTop/PCDeskTop/index.vue`
+- Remove: `src/pages/DeskTop/MobileDeskTop/index.vue`
+- Remove: `src/pages/DeskTop/Footer/index.vue`
 
 **Interfaces:**
 - Shell consumes `desktopApps`, window store, preference store and power store.
@@ -106,18 +108,17 @@ flowchart LR
 - PC icons retain one-click selection/double-click open; mobile icons open on a single tap.
 - Icon context menu provides Open, Rename, Delete, Properties; desktop blank-area menu provides Arrange, Refresh, New Folder, Properties. PC supports marquee selection, arrow-key navigation, F2 rename, Delete to Recycle Bin and Ctrl+A.
 
-- [ ] Move PC/mobile route selection under one shell boundary and keep separate presentation components only where interaction differs.
-- [ ] Implement desktop selection, icon focus, double-click timing and desktop right-click menu.
-- [ ] Implement functional Start Menu launch/search against local app manifest.
-- [ ] Implement taskbar window switching/minimize behavior, clock cleanup and local tray indicators.
-- [ ] Verify all shell controls operate without external navigation and resize between 700px layouts.
+- [x] Move PC/mobile route selection under one shell boundary and keep separate presentation components only where interaction differs.
+- [x] Implement desktop selection, icon focus, double-click timing and desktop right-click menu.
+- [x] Implement functional Start Menu launch/search against local app manifest.
+- [x] Implement taskbar window switching/minimize behavior, clock cleanup and local tray indicators.
+- [x] Verify all shell controls operate without external navigation and resize between 700px layouts.
 
 ## Task 3: Window manager and XP window frame
 
 **Files:**
-- Create: `src/stores/windowStore.ts`
-- Create: `src/components/window/AppWindow.vue`
-- Create: `src/components/window/WindowControls.vue`
+- Modify: `src/store/windowStore.ts`
+- Modify: `src/components/Window/AppWindow.vue`
 - Modify: `src/components/desktop/DesktopShell.vue`
 - Modify: `src/global.css`
 
@@ -173,7 +174,7 @@ flowchart LR
 ## Task 6: Local Network Places and system tray
 
 **Files:**
-- Create: `src/stores/systemStore.ts`
+- Create: `src/store/systemStore.ts`
 - Create: `src/components/apps/NetworkPlacesApp.vue`
 - Create: `src/components/apps/NetworkConnectionsApp.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
@@ -211,12 +212,10 @@ flowchart LR
 ## Task 8: Control Panel, appearance, and sound
 
 **Files:**
-- Create: `src/stores/preferencesStore.ts`
+- Create: `src/store/preferencesStore.ts`
 - Create: `src/components/apps/ControlPanelApp.vue`
 - Create: `src/components/apps/DisplayPropertiesApp.vue`
 - Create: `src/components/apps/SoundPropertiesApp.vue`
-- Modify: `src/pages/DeskTop/PCDeskTop/index.vue`
-- Modify: `src/pages/DeskTop/MobileDeskTop/index.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
 
 **Interfaces:**
@@ -232,7 +231,7 @@ flowchart LR
 ## Task 9: Power actions and boot/login integration
 
 **Files:**
-- Create: `src/stores/powerStore.ts`
+- Create: `src/store/powerStore.ts`
 - Modify: `src/components/Modal/ShutDown/ShutDown.vue`
 - Modify: `src/components/Modal/ShutDown/index.ts`
 - Modify: `src/pages/Password/index.vue`

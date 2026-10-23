@@ -39,13 +39,27 @@ button { color: inherit; font: inherit; }
 .xp-tray { min-width: 10rem; display: flex; align-items: center; justify-content: space-around; padding: 0 1rem; background: linear-gradient(#168bd4,#1267ba); border-left: 1px solid #1253b1; font-size: 1.2rem; }
 .xp-tray img { width: 1.8rem; height: 1.8rem; object-fit: contain; }
 .xp-start-menu { position: absolute; left: 0; bottom: 4rem; width: 32rem; padding: .6rem; border: 1px solid #174aab; border-radius: .7rem .7rem 0 0; background: #f5f5f5; color: #222; box-shadow: 3px 0 8px #1238; }
+.xp-start-menu { width: min(52rem, 94vw); padding: 0; overflow: hidden; }
+.xp-start-columns { display: grid; grid-template-columns: 1fr 1fr; max-height: min(38rem, 72vh); overflow: auto; }
+.xp-start-pinned, .xp-start-all-programs { display: flex; flex-direction: column; gap: .3rem; padding: .8rem; }
+.xp-start-pinned { background: #fff; }
+.xp-start-all-programs { background: #dce8f7; }
+.xp-start-all-programs > strong { padding: .5rem .7rem; color: #19488e; border-bottom: 1px solid #abc3e1; }
+.xp-start-app { display: flex; align-items: center; gap: .8rem; min-height: 4rem; padding: .5rem .7rem; border: 0; background: transparent; color: #222; text-align: left; cursor: pointer; }
+.xp-start-app:hover { background: #d7e8ff; }
+.xp-start-app img { width: 2.8rem; height: 2.8rem; object-fit: contain; }
+.xp-start-search { display: grid; gap: .4rem; margin-top: auto; padding: .8rem .3rem .2rem; color: #555; font-size: 1.1rem; }
+.xp-start-search input { width: 100%; height: 2.8rem; padding: 0 .7rem; border: 1px solid #839aba; background: white; color: #222; }
+.xp-start-no-results { padding: 1rem; color: #555; }
 .xp-start-user { height: 5.6rem; display: flex; align-items: center; gap: 1rem; padding: .7rem 1rem; margin: -.6rem -.6rem .6rem; color: white; background: linear-gradient(#3a79d8,#16449b); font-size: 1.6rem; }
+.xp-start-menu .xp-start-user { margin: 0; }
 .xp-start-user img { width: 4rem; height: 4rem; object-fit: cover; border: 2px solid white; border-radius: .5rem; }
 .xp-start-apps { display: grid; grid-template-columns: 1fr 1fr; gap: .2rem; min-height: 17rem; }
 .xp-start-apps button { display: flex; align-items: center; gap: .8rem; min-height: 4rem; padding: .5rem; border: 0; background: transparent; color: #222; text-align: left; cursor: pointer; }
 .xp-start-apps button:hover { background: #d9e8fb; }
 .xp-start-apps img { width: 2.8rem; height: 2.8rem; object-fit: contain; }
 .xp-start-bottom { display: flex; justify-content: space-between; align-items: center; margin: .5rem -.6rem -.6rem; padding: .8rem 1rem; color: white; background: linear-gradient(#3a79d8,#16449b); }
+.xp-start-menu .xp-start-bottom { margin: 0; }
 .xp-start-bottom button { padding: .4rem .8rem; border: 1px solid #888; border-radius: .3rem; background: #eee; color: #222; cursor: pointer; }
 .xp-window { position: absolute; display: flex; flex-direction: column; min-width: 30rem; min-height: 20rem; overflow: hidden; border: 1px solid #083b8f; border-radius: .8rem .8rem .2rem .2rem; background: #f0f0f0; color: #202020; box-shadow: 3px 4px 12px #152b5c88; }
 .xp-window-maximized { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 4rem) !important; border-radius: 0; }
@@ -74,8 +88,24 @@ button { color: inherit; font: inherit; }
 .xp-context-menu button:hover:not(:disabled) { background: #316ac5; color: white; }
 .xp-context-menu button:disabled { color: #999; }
 .xp-context-menu hr { border: 0; border-top: 1px solid #ccc; margin: .2rem 0; }
+.xp-selection-marquee { position: absolute; z-index: 19999; pointer-events: none; border: 1px solid #9fc8ff; background: #69a7ed44; }
+.xp-dialog-backdrop { position: absolute; z-index: 30000; inset: 0; display: grid; place-items: center; padding: 1.5rem; background: #001a4d66; }
+.xp-dialog { width: min(42rem, 94vw); overflow: hidden; border: 1px solid #083b8f; border-radius: .7rem .7rem .3rem .3rem; background: #f2f2f2; color: #222; box-shadow: 3px 5px 18px #001a4d99; font-size: 1.3rem; }
+.xp-dialog-titlebar { height: 3rem; display: flex; align-items: center; justify-content: space-between; padding: 0 .6rem 0 1rem; color: #fff; background: linear-gradient(90deg,#0b3da5,#3e80e7 55%,#1556c2); font-weight: 700; }
+.xp-dialog-titlebar button { width: 2.2rem; height: 2rem; border: 1px solid #fff; border-radius: .3rem; background: linear-gradient(#ef896b,#c63423); color: #fff; font-weight: 700; cursor: pointer; }
+.xp-dialog-content { min-height: 9rem; display: flex; align-items: center; gap: 1.5rem; padding: 2rem; white-space: pre-line; }
+.xp-dialog-icon { flex: 0 0 auto; font-size: 3.4rem; }
+.xp-dialog-message { flex: 1; display: grid; gap: 1rem; }
+.xp-dialog-message input { width: 100%; height: 3rem; padding: 0 .7rem; border: 1px solid #8298b4; background: #fff; color: #222; font: inherit; user-select: text; }
+.xp-dialog-actions { display: flex; justify-content: flex-end; gap: .8rem; padding: 0 1.5rem 1.4rem; }
+.xp-dialog-actions button { min-width: 8rem; padding: .6rem 1rem; border: 1px solid #7588a2; border-radius: .3rem; background: linear-gradient(#fff,#dedede); color: #222; cursor: pointer; }
+.xp-dialog-actions button.primary { border-color: #2455a6; background: linear-gradient(#fff,#cfe0f7); }
 .xp-window-mobile { position: absolute; inset: 0 0 5rem; width: 100%; height: auto; min-width: 0; min-height: 0; border: 0; border-radius: 0; }
 .xp-mobile-desktop .desktop-icons-mobile { inset: 1.5rem 1rem 5rem; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); grid-auto-rows: 8rem; gap: 1rem; align-content: start; }
+.desktop-folder-icon { display: grid; place-items: center; width: 3.8rem; height: 3.8rem; font-size: 3.5rem; line-height: 1; }
+.xp-icons-small .desktop-icon { width: 7.5rem; min-height: 5.8rem; flex-direction: row; justify-content: flex-start; text-align: left; }
+.xp-icons-small .desktop-icon img, .xp-icons-small .desktop-folder-icon { width: 2.8rem; height: 2.8rem; flex: 0 0 2.8rem; font-size: 2.6rem; }
+.xp-icons-small .desktop-icon span { text-align: left; }
 .desktop-icons-mobile .desktop-icon { width: 100%; min-height: 8rem; font-size: 1.3rem; }
 .desktop-icons-mobile .desktop-icon img { width: 4.4rem; height: 4.4rem; }
 .xp-taskbar-mobile { height: 5rem; padding-right: .4rem; }
