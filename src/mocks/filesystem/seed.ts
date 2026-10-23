@@ -17,7 +17,7 @@ const entries: MockEntry[] = [
   { id: "sample-blog-link", parentId: "my-documents", name: "个人主页.url", kind: "file", type: "text/x-url-shortcut", size: 32, modifiedAt: seedTime, content: "http://blog.local/", system: true },
   { id: "sample-avatar", parentId: "my-pictures", name: "我的头像.jpg", kind: "file", type: "image/jpeg", size: 106_340, modifiedAt: seedTime, assetUrl: Avatar },
   { id: "sample-desktop-wallpaper", parentId: "my-pictures", name: "桌面壁纸.jpg", kind: "file", type: "image/jpeg", size: 399_620, modifiedAt: seedTime, assetUrl: DesktopBackground },
-  { id: "sample-login-sound", parentId: "my-music", name: "Windows 登录.wav", kind: "file", type: "audio/mpeg", size: 129_190, modifiedAt: seedTime, assetUrl: LoginSound },
+  { id: "sample-login-sound", parentId: "my-music", name: "Windows 登录.mp3", kind: "file", type: "audio/mpeg", size: 129_190, modifiedAt: seedTime, assetUrl: LoginSound },
 ]
 
 export function createSeedFilesystem(): FilesystemSnapshot {

@@ -91,6 +91,51 @@ button { color: inherit; font: inherit; }
 .xp-resize-ne, .xp-resize-nw, .xp-resize-se, .xp-resize-sw { width: 1rem; height: 1rem; }
 .xp-resize-ne { top: 0; right: 0; cursor: nesw-resize; }.xp-resize-nw { top: 0; left: 0; cursor: nwse-resize; }
 .xp-resize-se { right: 0; bottom: 0; cursor: nwse-resize; }.xp-resize-sw { left: 0; bottom: 0; cursor: nesw-resize; }
+.xp-window-content.xp-explorer-window-content { display: flex; overflow: hidden; padding: 0; }
+.xp-explorer { position: relative; flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; color: #222; background: #fff; font-size: 1.2rem; user-select: none; }
+.xp-explorer-toolbar { flex: 0 0 auto; padding: .5rem .7rem; border-bottom: 1px solid #c5cbd3; background: linear-gradient(#fafafa,#e6e8eb); }
+.xp-explorer-nav { min-width: 0; display: flex; align-items: center; gap: .4rem; }
+.xp-explorer-nav > button, .xp-explorer-view-toggle button { min-width: 2.6rem; height: 2.5rem; padding: 0 .5rem; border: 1px solid #9aa7b8; border-radius: .25rem; background: linear-gradient(#fff,#e1e5ea); color: #333; cursor: pointer; }
+.xp-explorer-nav > button:disabled { opacity: .45; cursor: default; }
+.xp-explorer-address { min-width: 0; flex: 1; display: flex; align-items: center; overflow: auto; padding: .2rem .4rem; border: 1px solid #aab5c3; background: #fff; white-space: nowrap; }
+.xp-explorer-address button { display: inline-flex; align-items: center; gap: .5rem; padding: .2rem .4rem; border: 0; background: transparent; color: #23539b; cursor: pointer; }
+.xp-explorer-address button.current { color: #222; font-weight: 700; }
+.xp-explorer-view-toggle { display: flex; gap: .2rem; }
+.xp-explorer-view-toggle button.active { background: #cfe3fb; border-color: #5b8bc4; }
+.xp-explorer-body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+.xp-explorer-sidebar { flex: 0 0 18rem; overflow: auto; padding: .8rem; background: #eef3f9; border-right: 1px solid #c6d3e2; }
+.xp-explorer-task { margin-bottom: .8rem; overflow: hidden; border: 1px solid #c0d1e4; border-radius: .5rem; background: linear-gradient(#fff,#e6eef8); }
+.xp-explorer-task h3 { padding: .6rem .8rem; color: #17498a; background: linear-gradient(#fff,#d7e6f6); font-size: 1.2rem; }
+.xp-explorer-task button { display: block; width: 100%; padding: .6rem .7rem; border: 0; background: transparent; color: #245693; text-align: left; cursor: pointer; }
+.xp-explorer-task button:hover:not(:disabled) { text-decoration: underline; }
+.xp-explorer-task button:disabled { color: #999; }
+.xp-explorer-task p, .xp-explorer-task small { display: block; padding: .3rem .8rem; color: #444; }
+.xp-explorer-main { flex: 1; min-width: 0; min-height: 0; overflow: auto; outline: none; background: #fff; }
+.xp-explorer-items { min-height: 100%; display: flex; flex-wrap: wrap; align-content: flex-start; gap: .5rem; padding: .8rem; }
+.xp-file-item { min-width: 0; border: 1px solid transparent; background: transparent; color: #222; font: inherit; cursor: default; }
+.xp-file-item.selected { border: 1px dotted #356cbb; background: #cfe4ff; }
+.xp-file-icons { width: 9rem; min-height: 8.5rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: .4rem; padding: .6rem; }
+.xp-file-icon { display: grid; place-items: center; flex: 0 0 auto; width: 3.5rem; height: 3.5rem; font-size: 3rem; }
+.xp-file-name { max-width: 100%; overflow-wrap: anywhere; text-align: center; }
+.xp-file-details-list { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 0; padding: 0; }
+.xp-explorer-columns, .xp-file-details { display: grid; grid-template-columns: 2.8rem minmax(10rem,2fr) minmax(8rem,1.3fr) 8rem 13rem; align-items: center; }
+.xp-explorer-columns { position: sticky; z-index: 1; top: 0; height: 2.8rem; border-bottom: 1px solid #c6cbd2; background: linear-gradient(#fafafa,#e8e8e8); }
+.xp-explorer-columns button { height: 100%; padding: 0 .5rem; border: 0; border-right: 1px solid #d0d0d0; background: transparent; color: #222; text-align: left; cursor: pointer; }
+.xp-file-details { width: 100%; min-height: 3rem; border: 0; border-bottom: 1px solid #eee; text-align: left; }
+.xp-file-details .xp-file-icon { width: 2.6rem; height: 2.6rem; font-size: 2rem; }
+.xp-file-details .xp-file-name { text-align: left; }
+.xp-file-type, .xp-file-size, .xp-file-date { overflow: hidden; padding: 0 .5rem; color: #555; text-overflow: ellipsis; white-space: nowrap; }
+.xp-explorer-empty { width: 100%; padding: 3rem; color: #777; text-align: center; }
+.xp-explorer-status { flex: 0 0 2.4rem; display: flex; align-items: center; justify-content: space-between; padding: 0 .9rem; border-top: 1px solid #c6cbd2; color: #555; background: #f6f6f6; }
+.xp-explorer-context { z-index: 25000; }
+.xp-file-preview-backdrop { position: absolute; z-index: 26000; inset: 0; display: grid; place-items: center; padding: 1.5rem; background: #001a4d66; }
+.xp-file-preview { width: min(58rem, 94%); max-height: 90%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #083b8f; border-radius: .6rem; background: #f4f4f4; box-shadow: 2px 4px 15px #0007; }
+.xp-file-preview > header { flex: 0 0 3rem; display: flex; align-items: center; justify-content: space-between; padding: 0 .8rem 0 1rem; color: #fff; background: linear-gradient(90deg,#0b3da5,#3e80e7 55%,#1556c2); }
+.xp-file-preview > header button { width: 2.2rem; height: 2rem; border: 1px solid #fff; border-radius: .3rem; background: linear-gradient(#ef896b,#c63423); color: #fff; font-weight: 700; cursor: pointer; }
+.xp-file-preview > main { min-height: 8rem; overflow: auto; padding: 1rem; text-align: center; }
+.xp-file-preview img { max-width: 100%; max-height: 52vh; object-fit: contain; }
+.xp-file-preview audio { width: min(42rem,100%); margin-top: 2rem; }
+.xp-file-preview pre { color: #222; text-align: left; white-space: pre-wrap; user-select: text; }
 .xp-context-menu { position: absolute; z-index: 21000; width: 19rem; padding: .4rem; border: 1px solid #777; background: #f4f4f4; color: #222; box-shadow: 2px 3px 7px #0006; }
 .xp-context-menu button { display: block; width: 100%; padding: .6rem .9rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: default; }
 .xp-context-menu button:hover:not(:disabled) { background: #316ac5; color: white; }

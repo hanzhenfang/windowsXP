@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { useWindowStore, type AppWindow as WindowState } from "@/store/windowStore"
 import { getDesktopApp } from "@/apps/manifest"
+import ExplorerApp from "@/components/apps/ExplorerApp.vue"
 
 const props = defineProps<{ window: WindowState; mobile: boolean }>()
 const store = useWindowStore()
@@ -65,19 +66,17 @@ function toggleFromTitle(event: MouseEvent) {
         <button aria-label="关闭" class="xp-close" @click.stop="store.close(window.id)">×</button>
       </div>
     </header>
-    <div class="xp-window-toolbar"><span>文件(F)</span><span>编辑(E)</span><span>查看(V)</span><span>收藏(A)</span><span>工具(T)</span><span>帮助(H)</span></div>
-    <div class="xp-window-content">
+    <div v-if="window.appId !== 'computer'" class="xp-window-toolbar"><span>文件(F)</span><span>编辑(E)</span><span>查看(V)</span><span>收藏(A)</span><span>工具(T)</span><span>帮助(H)</span></div>
+    <div class="xp-window-content" :class="{ 'xp-explorer-window-content': window.appId === 'computer' }">
       <template v-if="window.appId === 'computer'">
-        <h2>存储在这台计算机上的文件</h2>
-        <div class="xp-drive-grid"><div><span>💾</span><b>本地磁盘 (C:)</b><small>系统磁盘</small></div><div><span>💿</span><b>DVD 驱动器 (D:)</b><small>光盘驱动器</small></div></div>
-        <h2>其他位置</h2><p>控制面板　　我的文档　　共享文档</p>
+        <ExplorerApp :initial-folder-id="window.initialFolderId" />
       </template>
       <template v-else-if="window.appId === 'recycle'"><div class="xp-empty">🗑️<p>{{ app?.description }}</p></div></template>
       <template v-else-if="window.appId === 'network'"><h2>网络任务</h2><p>查看网络连接、设置家庭或小型办公网络。</p><div class="xp-network-card">🌐　局域网或高速 Internet</div></template>
       <template v-else-if="window.appId === 'browser'"><div class="xp-browser-placeholder"><div>🌐</div><h2>Internet Explorer</h2><p>浏览器将在本地打开模拟页面，不会连接外网。</p><button @click="store.close(window.id)">关闭窗口</button></div></template>
       <template v-else-if="window.appId === 'blog'"><div class="xp-browser-placeholder"><h2>韩振方的个人主页</h2><p>本地示例主页</p><p>文章内容将在个人博客模块中补齐。</p></div></template>
     </div>
-    <footer class="xp-window-status">对象: {{ window.appId === 'computer' ? '2' : '0' }}</footer>
+    <footer v-if="window.appId !== 'computer'" class="xp-window-status">对象: 0</footer>
     <template v-if="!mobile && window.state === 'normal'">
       <div v-for="direction in ['n','s','e','w','ne','nw','se','sw']" :key="direction" class="xp-resize-handle" :class="`xp-resize-${direction}`" @pointerdown="beginResize($event, direction)" @pointermove="moveResize" @pointerup="endResize" @pointercancel="endResize"></div>
     </template>

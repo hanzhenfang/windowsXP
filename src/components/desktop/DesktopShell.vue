@@ -66,7 +66,7 @@ function handleIconContextMenu(event: MouseEvent, item: { id: string; type: "app
 function closeContextMenu() { contextMenu.value = null }
 function openSelected() {
   if (contextMenu.value?.appId) windows.open(contextMenu.value.appId)
-  if (contextMenu.value?.folderId) windows.open("computer")
+  if (contextMenu.value?.folderId) windows.open("computer", contextMenu.value.folderId)
   closeContextMenu()
 }
 function renameSelected() {
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div id="desktop-shell" class="xp-desktop" :class="desktopClass" :style="{ backgroundImage: `url(${DeskBg})` }" @contextmenu.prevent="handleBlankContextMenu" @pointerdown="beginMarquee" @pointermove="updateMarquee" @pointerup="endMarquee" @pointercancel="endMarquee" @click.self="refreshDesktop" @keydown="onDesktopKeyDown" tabindex="0">
-    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.open($event)" @open-folder="windows.open('computer')" @context-icon="handleIconContextMenu" />
+    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.open($event)" @open-folder="windows.open('computer', $event)" @context-icon="handleIconContextMenu" />
     <TransitionGroup v-if="!mobile" name="xp-window-transition">
       <AppWindow v-for="window in windows.visibleWindows" :key="window.id" :window="window" :mobile="false" />
     </TransitionGroup>

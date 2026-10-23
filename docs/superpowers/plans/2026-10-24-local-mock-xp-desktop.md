@@ -141,18 +141,18 @@ flowchart LR
 - Create: `src/components/apps/ExplorerToolbar.vue`
 - Create: `src/components/apps/FileItem.vue`
 - Modify: `src/apps/manifest.ts`
-- Modify: `src/components/window/AppWindow.vue`
+- Modify: `src/components/Window/AppWindow.vue`
 
 **Interfaces:**
 - Explorer state: current folder ID, back/forward history, selected entry IDs, sort key/order, view (`icons` or `details`).
 - Explorer operations use `useFilesystemStore`; route breadcrumbs and double-click folder/file open are local only.
 - Context actions: Open, New Folder, Rename, Delete, Properties; files open a local preview dialog for supported TXT/image/audio samples.
 
-- [ ] Build My Computer drives and folder navigation with XP task pane and address/breadcrumb bar.
-- [ ] Add icon/details views, sorting, selection, keyboard navigation and local file preview.
-- [ ] Add create/rename/delete operations with name validation and same-folder conflict feedback.
-- [ ] Add Explorer context menu and navigation history.
-- [ ] Verify create/rename/delete results remain correct after reload.
+- [x] Build My Computer drives and folder navigation with XP task pane and address/breadcrumb bar.
+- [x] Add icon/details views, sorting, selection, keyboard navigation and local file preview.
+- [x] Add create/rename/delete operations with name validation and same-folder conflict feedback.
+- [x] Add Explorer context menu and navigation history.
+- [x] Create, rename, and delete a temporary folder in an isolated local origin; reload after each operation and confirm the persisted result.
 
 ## Task 5: Recycle Bin
 

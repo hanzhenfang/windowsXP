@@ -10,11 +10,12 @@ export interface DesktopApp {
   icon: string
   description: string
   kind: "computer" | "recycle" | "network" | "browser" | "blog"
+  defaultFolderId?: string
   system?: boolean
 }
 
 export const desktopApps: DesktopApp[] = [
-  { id: "computer", title: "我的电脑", icon: ComputerIcon, description: "系统文件与磁盘驱动器", kind: "computer", system: true },
+  { id: "computer", title: "我的电脑", icon: ComputerIcon, description: "系统文件与磁盘驱动器", kind: "computer", defaultFolderId: "my-computer", system: true },
   { id: "recycle", title: "回收站", icon: RecycleIcon, description: "回收站当前为空。", kind: "recycle", system: true },
   { id: "network", title: "网络邻居", icon: NetworkIcon, description: "查看网络连接与共享资源。", kind: "network", system: true },
   { id: "browser", title: "Internet Explorer", icon: IeIcon, description: "本地模拟的 Internet Explorer。", kind: "browser" },

@@ -6,6 +6,7 @@ export type WindowState = "normal" | "minimized" | "maximized"
 export interface AppWindow {
   id: string
   appId: string
+  initialFolderId?: string
   title: string
   icon: string
   state: WindowState
@@ -29,12 +30,13 @@ export const useWindowStore = defineStore("windows", {
     activeWindow: (state) => state.windows.find((window) => window.id === state.activeWindowId),
   },
   actions: {
-    open(appId: string) {
+    open(appId: string, initialFolderId?: string) {
       const app = getDesktopApp(appId)
       if (!app) return
-      // IE is the only application that follows XP's multi-instance behavior.
-      const existing = appId === "browser" ? undefined : this.windows.find((window) => window.appId === appId)
+      const targetFolderId = initialFolderId ?? app.defaultFolderId
+      const existing = this.windows.find((window) => window.appId === appId)
       if (existing) {
+        if (targetFolderId) existing.initialFolderId = targetFolderId
         this.focus(existing.id)
         return existing.id
       }
@@ -47,6 +49,7 @@ export const useWindowStore = defineStore("windows", {
       const window: AppWindow = {
         id,
         appId,
+        initialFolderId: targetFolderId,
         title: app.title,
         icon: app.icon,
         state: "normal",
