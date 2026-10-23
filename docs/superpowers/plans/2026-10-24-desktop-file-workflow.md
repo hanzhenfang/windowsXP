@@ -30,7 +30,8 @@
 ## Task 1: Regression runner and desktop preference model
 
 **Files:**
-- Modify: `package.json`, `pnpm-lock.yaml`, `vite.config.ts`
+- Modify: `package.json`, `pnpm-lock.yaml`
+- Create: `vitest.config.ts`, `src/test/setup.ts`, `src/test/runner.test.ts`
 - Create: `src/mocks/desktop/preferences.ts`
 - Modify: `src/store/desktopStore.ts`, `src/store/windowStore.ts`
 - Test: `src/mocks/desktop/preferences.test.ts`, `src/store/windowStore.test.ts`
@@ -40,7 +41,7 @@
 - `loadDesktopPreferences(raw: string | null): DesktopPreferences` validates v1/v2 values and supplies safe defaults; legacy v1 values migrate without dropping names/hidden shortcuts.
 - Window layout persistence stores `{ appId, x, y, width, height }[]`; window session state remains transient. `open(appId)` applies the saved layout and `move`/`resize` saves it.
 
-- [ ] Add Vitest `0.34.6`, Vue Test Utils `2.4.6`, jsdom setup and package scripts (`test`, `test:watch`).
+- [ ] Add Vitest `0.34.6`, Vue Test Utils `2.4.6`, jsdom setup and package scripts (`test`, `test:watch`); run a runner smoke test before writing feature assertions.
 - [ ] Write and run failing tests named `migratesV1ShortcutState`, `fallsBackForMalformedDesktopState`, `keepsOnlyFiveRecentApps`, and `restoresWindowGeometryOnManualOpen`.
 - [ ] Implement v2 preference parsing and localStorage adapter with safe bounds for coordinates and labels.
 - [ ] Persist window geometry by app ID and restore it only on the next manual open; the new test must fail before the store change and pass after.
