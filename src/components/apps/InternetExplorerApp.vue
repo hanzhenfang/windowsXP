@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { usePreferencesStore } from "@/store/preferencesStore"
+import { usePreferencesStore, type BrowserTabPreference } from "@/store/preferencesStore"
 import { useWindowStore } from "@/store/windowStore"
 import { mockBlogPosts, resolveLocalPage } from "@/mocks/browser/pages"
 
@@ -9,8 +9,9 @@ const props = defineProps<{ windowId: string }>()
 const preferences = usePreferencesStore()
 const windows = useWindowStore()
 let nextTabId = 0
-const tabs = ref<BrowserTabState[]>([makeTab("about:home")])
-const activeTabId = ref(tabs.value[0].id)
+const savedTabs = preferences.browserTabs.map((tab) => ({ ...tab, history: tab.history.slice() }))
+const tabs = ref<BrowserTabState[]>(savedTabs)
+const activeTabId = ref(savedTabs.some((tab) => tab.id === preferences.activeBrowserTabId) ? preferences.activeBrowserTabId : savedTabs[0].id)
 const addressInput = ref("about:home")
 const searchInput = ref("")
 const pageRevision = ref(0)
@@ -23,7 +24,7 @@ const favoriteLabels = computed(() => preferences.browserFavorites.map((address)
 
 function makeTab(address: string): BrowserTabState {
   const initialAddress = resolveLocalPage(address).address
-  return { id: `ie-tab-${++nextTabId}`, address: initialAddress, history: [initialAddress], historyIndex: 0 }
+  return { id: `ie-tab-${Date.now()}-${++nextTabId}`, address: initialAddress, history: [initialAddress], historyIndex: 0 }
 }
 function updateWindowTitle() {
   windows.setWindowTitle(props.windowId, `Internet Explorer - ${page.value.title}`)
@@ -34,6 +35,9 @@ watch(() => activeTab.value?.address, (address) => {
   updateWindowTitle()
 }, { immediate: true })
 watch(page, updateWindowTitle)
+watch([tabs, activeTabId], () => {
+  preferences.setBrowserSession(tabs.value as BrowserTabPreference[], activeTabId.value)
+}, { deep: true })
 
 function navigate(address: string, addHistory = true) {
   const tab = activeTab.value
