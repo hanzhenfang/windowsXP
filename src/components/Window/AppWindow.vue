@@ -7,6 +7,9 @@ import NetworkPlacesApp from "@/components/apps/NetworkPlacesApp.vue"
 import NetworkConnectionsApp from "@/components/apps/NetworkConnectionsApp.vue"
 import InternetExplorerApp from "@/components/apps/InternetExplorerApp.vue"
 import BlogApp from "@/components/apps/BlogApp.vue"
+import ControlPanelApp from "@/components/apps/ControlPanelApp.vue"
+import DisplayPropertiesApp from "@/components/apps/DisplayPropertiesApp.vue"
+import SoundPropertiesApp from "@/components/apps/SoundPropertiesApp.vue"
 
 const props = defineProps<{ window: WindowState; mobile: boolean }>()
 const store = useWindowStore()
@@ -79,6 +82,9 @@ function toggleFromTitle(event: MouseEvent) {
       <template v-else-if="window.appId === 'network-connections'"><NetworkConnectionsApp /></template>
       <template v-else-if="window.appId === 'browser'"><InternetExplorerApp :window-id="window.id" /></template>
       <template v-else-if="window.appId === 'blog'"><BlogApp /></template>
+      <template v-else-if="window.appId === 'control-panel'"><ControlPanelApp /></template>
+      <template v-else-if="window.appId === 'display-properties'"><DisplayPropertiesApp /></template>
+      <template v-else-if="window.appId === 'sound-properties'"><SoundPropertiesApp /></template>
     </div>
     <footer v-if="window.appId !== 'computer' && window.appId !== 'recycle'" class="xp-window-status">对象: 0</footer>
     <template v-if="!mobile && window.state === 'normal'">

@@ -11,13 +11,16 @@ import Taskbar from "./Taskbar.vue"
 import DesktopContextMenu from "./DesktopContextMenu.vue"
 import DesktopActionDialog from "./DesktopActionDialog.vue"
 import DeskBg from "@/assets/deskbg.jpg"
+import DesktopBackground from "@/assets/desktopBackground.jpg"
 import LoginAudio from "@/assets/audio/login.mp3"
+import { usePreferencesStore } from "@/store/preferencesStore"
 import { ShutDownModalCreator } from "@/components/Modal/ShutDown"
 
 const props = withDefaults(defineProps<{ mobile?: boolean }>(), { mobile: false })
 const windows = useWindowStore()
 const desktop = useDesktopStore()
 const filesystem = useFilesystemStore()
+const preferences = usePreferencesStore()
 const { play } = useSystemAudio()
 const audio = ref<HTMLAudioElement>()
 const contextMenu = ref<{ x: number; y: number; appId?: string; folderId?: string } | null>(null)
@@ -33,7 +36,12 @@ const sortedApps = computed(() => {
 })
 const desktopFolders = computed(() => filesystem.childrenOf("desktop-folder").filter((entry) => entry.kind === "folder"))
 const recycleCount = computed(() => filesystem.recycleBinEntries.length)
-const desktopClass = computed(() => ({ "xp-mobile-desktop": props.mobile, "xp-icons-small": desktop.iconSize === "small" }))
+const desktopClass = computed(() => ({
+  "xp-mobile-desktop": props.mobile,
+  "xp-icons-small": preferences.iconSize === "small",
+  [`xp-theme-${preferences.themeColor}`]: true,
+}))
+const wallpaper = computed(() => preferences.wallpaperId === "desktop-background" ? DesktopBackground : DeskBg)
 const shutdownModal = new ShutDownModalCreator()
 
 function positionContextMenu(event: MouseEvent, target?: { appId?: string; folderId?: string }) {
@@ -100,7 +108,12 @@ function showProperties() {
 }
 function refreshDesktop() { desktop.selectedId = null; desktop.selectedIds = []; closeContextMenu() }
 function sortDesktop() { desktop.sortAlphabetically = !desktop.sortAlphabetically; closeContextMenu() }
-function toggleIconSize() { desktop.iconSize = desktop.iconSize === "large" ? "small" : "large"; closeContextMenu() }
+function toggleIconSize() {
+  const size = preferences.iconSize === "large" ? "small" : "large"
+  desktop.iconSize = size
+  preferences.setIconSize(size)
+  closeContextMenu()
+}
 function onDocumentKeyDown(event: KeyboardEvent) {
   if (event.key === "Escape") {
     closeContextMenu()
@@ -212,7 +225,8 @@ onMounted(() => {
   document.addEventListener("keydown", onDocumentKeyDown)
   document.addEventListener("click", onDocumentClick)
   window.addEventListener("resize", windows.resizeForViewport, { passive: true })
-  play(audio.value)
+  if (audio.value) audio.value.volume = preferences.soundVolume
+  if (preferences.soundEnabled) play(audio.value)
 })
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", onDocumentKeyDown)
@@ -223,7 +237,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div id="desktop-shell" class="xp-desktop" :class="desktopClass" :style="{ backgroundImage: `url(${DeskBg})` }" @contextmenu.prevent="handleBlankContextMenu" @pointerdown="beginMarquee" @pointermove="updateMarquee" @pointerup="endMarquee" @pointercancel="endMarquee" @click.self="refreshDesktop" @keydown="onDesktopKeyDown" tabindex="0">
+  <div id="desktop-shell" class="xp-desktop" :class="desktopClass" :style="{ backgroundImage: `url(${wallpaper})` }" @contextmenu.prevent="handleBlankContextMenu" @pointerdown="beginMarquee" @pointermove="updateMarquee" @pointerup="endMarquee" @pointercancel="endMarquee" @click.self="refreshDesktop" @keydown="onDesktopKeyDown" tabindex="0">
     <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" :recycle-count="recycleCount" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.open($event)" @open-folder="windows.open('computer', $event)" @context-icon="handleIconContextMenu" />
     <TransitionGroup v-if="!mobile" name="xp-window-transition">
       <AppWindow v-for="window in windows.visibleWindows" :key="window.id" :window="window" :mobile="false" />

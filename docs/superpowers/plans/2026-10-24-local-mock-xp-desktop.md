@@ -226,16 +226,20 @@ flowchart LR
 - Create: `src/components/apps/DisplayPropertiesApp.vue`
 - Create: `src/components/apps/SoundPropertiesApp.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/apps/manifest.ts`
+- Modify: `src/global.css`
 
 **Interfaces:**
 - Preferences schema v1: wallpaper ID, sound enabled, sound volume (0..1), icon size and theme color.
 - Preference service saves validated values in `windows-xp-mock:preferences`.
 - System event sounds use existing local MP3 only and respect enabled/volume/autoplay restrictions.
 
-- [ ] Add versioned preferences store and local persistence.
-- [ ] Implement Control Panel categories and Display Properties wallpaper selection using existing local assets.
-- [ ] Implement sound toggle/volume with local preview sound and tray toggle.
-- [ ] Apply preference changes immediately on PC and mobile; verify after reload.
+- [x] Add versioned preferences store and local persistence.
+- [x] Implement Control Panel categories and Display Properties wallpaper selection using existing local assets.
+- [x] Implement sound toggle/volume with local preview sound and tray toggle.
+- [x] Apply preference changes immediately on PC and mobile; verify after reload.
 
 ## Task 9: Power actions and boot/login integration
 

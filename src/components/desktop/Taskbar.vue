@@ -7,11 +7,13 @@ import ShieldIcon from "@/assets/systemIcon/安全卫士.ico"
 import NetworkIcon from "@/assets/systemIcon/网络邻居.ico"
 import StartMenu from "./StartMenu.vue"
 import { useSystemStore } from "@/store/systemStore"
+import { usePreferencesStore } from "@/store/preferencesStore"
 
 const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void }>()
 const windows = useWindowStore()
 const root = useRootStore()
 const system = useSystemStore()
+const preferences = usePreferencesStore()
 const isStartOpen = ref(false)
 const now = ref(new Date())
 const isMobile = computed(() => root.isMobile)
@@ -44,7 +46,7 @@ function toggleTaskWindow(id: string) {
 </script>
 
 <template>
-  <div class="xp-taskbar" :class="{ 'xp-taskbar-mobile': isMobile }">
+  <div class="xp-taskbar" :class="[`xp-taskbar-theme-${preferences.themeColor}`, { 'xp-taskbar-mobile': isMobile }]">
     <Transition name="start-menu"><StartMenu v-if="isStartOpen" @launch="emit('launch', $event); isStartOpen = false" @power="emit('power'); isStartOpen = false" /></Transition>
     <button class="xp-start-button" :class="{ active: isStartOpen }" aria-label="开始" @click="isStartOpen = !isStartOpen"><img :src="WindowsLogo" /><span>开始</span></button>
     <div class="xp-task-items">
@@ -56,6 +58,7 @@ function toggleTaskWindow(id: string) {
         <img v-if="system.networkConnected" class="xp-network-status-icon" :src="NetworkIcon" alt="" />
         <span v-else class="xp-network-status-disconnected" aria-hidden="true">⛔</span>
       </button>
+      <button class="xp-volume-tray-button" :aria-label="preferences.soundEnabled ? '关闭系统音效' : '开启系统音效'" :title="preferences.soundEnabled ? '系统音效：已开启（点击静音）' : '系统音效：已关闭（点击开启）'" @click="preferences.setSoundEnabled(!preferences.soundEnabled)">{{ preferences.soundEnabled ? '🔊' : '🔇' }}</button>
       <time>{{ timeText }}</time>
     </div>
   </div>
