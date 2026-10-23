@@ -13,6 +13,9 @@ html {
 
 body { overflow: hidden; }
 button { color: inherit; font: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
+.desktop-icon:focus-visible { background: rgba(49,106,197,.55); border-color: #dcecff; }
+.xp-explorer-main:focus-visible { outline: 2px solid #316ac5; outline-offset: -2px; }
 
 .xp-desktop {
   position: relative;
@@ -433,3 +436,8 @@ button { color: inherit; font: inherit; }
 @media (max-width: 700px) { .xp-network-connection-task { display: none; } .xp-network-connections { gap: 0; } .xp-network-connection-details { grid-template-columns: minmax(7rem,.9fr) 1.3fr; padding: .8rem; } .xp-network-connections main footer { flex-wrap: wrap; } .xp-network-banner { align-items: flex-start; flex-wrap: wrap; gap: .8rem; padding: .9rem; } .xp-network-banner > div { flex-basis: calc(100% - 5rem); } .xp-network-computer, .xp-network-share { display: flex; width: calc(100% - .6rem); min-width: 0; } .xp-network-computer { flex-wrap: wrap; } .xp-network-computer small { width: 100%; margin-left: 3.5rem; } }
 @media (max-width: 700px) { .xp-ie-tabs { flex-basis: 2.8rem; } .xp-ie-tab { min-width: 8rem; } .xp-ie-navigation { gap: .2rem; padding: .4rem; } .xp-ie-navigation > button { flex-basis: 2.5rem; } .xp-ie-address-form label { display: none; } .xp-ie-address-form button { padding: 0 .5rem; } .xp-ie-favorites { max-width: 100%; } .xp-ie-local-page { padding: 1.5rem; } .xp-ie-home { padding: 1.5rem; } .xp-blog-layout { grid-template-columns: 1fr; gap: .8rem; padding: .8rem; overflow: auto; } .xp-blog-profile { padding: 1rem; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+@media (max-width: 700px) {
+  .xp-taskbar-mobile .xp-task-items button { min-width: 4.4rem; min-height: 4.4rem; height: 4.4rem; }
+  .xp-explorer-nav > button, .xp-explorer-view-toggle button, .xp-explorer-clipboard button, .xp-context-menu button { min-height: 4.4rem; }
+  .xp-file-item { min-height: 4.4rem; }
+}

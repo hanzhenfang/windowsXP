@@ -41,7 +41,7 @@ function confirm() {
       <header class="xp-dialog-titlebar"><span>{{ title }}</span><button aria-label="关闭" @click="close">×</button></header>
       <div class="xp-dialog-content">
         <span class="xp-dialog-icon">{{ mode === 'confirm' ? '❔' : mode === 'input' ? '📁' : 'ℹ️' }}</span>
-        <div class="xp-dialog-message"><p>{{ message }}</p><input v-if="mode === 'input'" ref="input" v-model="value" maxlength="64" @keydown.enter.stop.prevent="confirm" /></div>
+        <div class="xp-dialog-message"><p>{{ message }}</p><input v-if="mode === 'input'" ref="input" v-model="value" aria-label="项目名称" maxlength="64" @keydown.enter.stop.prevent="confirm" /></div>
       </div>
       <footer class="xp-dialog-actions">
         <button v-if="mode !== 'message'" @click="close">{{ cancelText }}</button>

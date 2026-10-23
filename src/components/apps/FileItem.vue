@@ -27,7 +27,7 @@ function formatDate(timestamp: number) {
 </script>
 
 <template>
-  <button class="xp-file-item" :class="[`xp-file-${view}`, { selected }]" :data-file-id="entry.id" @click.stop="emit('select', $event)" @dblclick.stop="emit('open')" @contextmenu.stop.prevent="emit('context', $event)">
+  <button class="xp-file-item" :class="[`xp-file-${view}`, { selected }]" :data-file-id="entry.id" :aria-pressed="selected" @click.stop="emit('select', $event)" @dblclick.stop="emit('open')" @contextmenu.stop.prevent="emit('context', $event)">
     <span class="xp-file-icon" aria-hidden="true">{{ iconFor(entry) }}</span>
     <span class="xp-file-name" :title="entry.name">{{ entry.name }}</span>
     <span v-if="view === 'details'" class="xp-file-type">{{ entry.kind === 'folder' ? '文件夹' : entry.type }}</span>

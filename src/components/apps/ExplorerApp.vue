@@ -171,6 +171,11 @@ function onExplorerKeyDown(event: KeyboardEvent) {
   if (event.target instanceof HTMLElement && (event.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName))) return
   if (dialog.value.visible) return
   if (event.key === "Escape") { closeContextMenu(); previewEntry.value = null; return }
+  if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
+    event.preventDefault()
+    contextMenu.value = { x: 8, y: 8, entryId: selectedEntry.value?.id }
+    return
+  }
   if (event.key === "Backspace") { event.preventDefault(); goUp(); return }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") { event.preventDefault(); selectedIds.value = entries.value.map((entry) => entry.id); return }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && canCopySelection.value) { event.preventDefault(); copySelected(); return }
@@ -202,7 +207,7 @@ watch(() => props.initialFolderId, (id) => { if (id) navigateTo(id) })
       <aside class="xp-explorer-sidebar">
         <section class="xp-explorer-task"><h3>文件和文件夹任务</h3><button :disabled="!selectedEntry || selectedEntry.system" @click="startRename">✏️　重命名此项目</button><button :disabled="!canDeleteSelection" @click="deleteSelected">🗑️　删除所选项目</button><button :disabled="!canCopySelection" @click="copySelected">📄　复制所选项目</button><button :disabled="!canDeleteSelection" @click="cutSelected">✂️　剪切所选项目</button><button :disabled="!clipboard" @click="pasteClipboard">📋　粘贴到此处</button><button @click="startNewFolder">📁　新建文件夹</button></section>
         <section class="xp-explorer-task"><h3>其他位置</h3><button @click="navigateTo('my-computer')">🖥️　我的电脑</button><button @click="navigateTo('my-documents')">📄　我的文档</button><button @click="navigateTo('desktop-folder')">🗂️　桌面</button><button @click="navigateTo('my-pictures')">🖼️　图片收藏</button><button @click="navigateTo('my-music')">🎵　我的音乐</button><button @click="windows.open('recycle')">{{ filesystem.recycleBinEntries.length ? '🗑️📄' : '🗑️' }}　回收站（{{ filesystem.recycleBinEntries.length }}）</button></section>
-        <section class="xp-explorer-task"><h3>详细信息</h3><p>{{ selectedEntry?.name ?? currentFolder?.name }}</p><small>{{ selectedEntry ? (selectedEntry.kind === 'folder' ? '文件夹' : selectedEntry.type) : `${entries.length} 个对象` }}</small></section>
+        <section class="xp-explorer-task"><h3>详细信息</h3><p>{{ selectedEntry?.name ?? currentFolder?.name }}</p><small>{{ selectedEntry ? (selectedEntry.kind === 'folder' ? '文件夹' : selectedEntry.type) : `${displayEntries.length} 个对象` }}</small></section>
       </aside>
       <main class="xp-explorer-main" :class="`xp-explorer-${view}`" tabindex="0">
         <div v-if="view === 'details'" class="xp-explorer-columns"><span></span><button @click="setSort('name')">名称{{ sortKey === 'name' ? (sortAscending ? ' ▲' : ' ▼') : '' }}</button><button @click="setSort('type')">类型{{ sortKey === 'type' ? (sortAscending ? ' ▲' : ' ▼') : '' }}</button><button @click="setSort('size')">大小{{ sortKey === 'size' ? (sortAscending ? ' ▲' : ' ▼') : '' }}</button><button @click="setSort('modifiedAt')">修改日期{{ sortKey === 'modifiedAt' ? (sortAscending ? ' ▲' : ' ▼') : '' }}</button></div>
@@ -212,7 +217,7 @@ watch(() => props.initialFolderId, (id) => { if (id) navigateTo(id) })
         </div>
       </main>
     </div>
-    <footer class="xp-explorer-status"><span>{{ entries.length }} 个对象</span><span v-if="selectedIds.length">已选择 {{ selectedIds.length }} 个对象</span></footer>
+    <footer class="xp-explorer-status"><span>{{ displayEntries.length }} 个对象</span><span v-if="selectedIds.length">已选择 {{ selectedIds.length }} 个对象</span></footer>
     <div v-if="contextMenu" class="xp-context-menu xp-explorer-context" :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }" @click.stop>
       <button v-if="contextMenu.entryId" @click="openSelected">打开(O)</button>
       <button @click="startNewFolder">新建文件夹(W)</button>
