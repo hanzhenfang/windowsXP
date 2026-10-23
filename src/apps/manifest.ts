@@ -10,15 +10,14 @@ export interface DesktopApp {
   icon: string
   description: string
   kind: "computer" | "recycle" | "network" | "browser" | "blog"
-  externalUrl?: string
 }
 
 export const desktopApps: DesktopApp[] = [
   { id: "computer", title: "我的电脑", icon: ComputerIcon, description: "系统文件与磁盘驱动器", kind: "computer" },
   { id: "recycle", title: "回收站", icon: RecycleIcon, description: "回收站当前为空。", kind: "recycle" },
   { id: "network", title: "网络邻居", icon: NetworkIcon, description: "查看网络连接与共享资源。", kind: "network" },
-  { id: "browser", title: "Internet Explorer", icon: IeIcon, description: "打开我的掘金主页。", kind: "browser", externalUrl: "https://juejin.cn/user/3065861918435437" },
-  { id: "blog", title: "个人博客", icon: BlogIcon, description: "访问我的掘金主页。", kind: "blog", externalUrl: "https://juejin.cn/user/3065861918435437" },
+  { id: "browser", title: "Internet Explorer", icon: IeIcon, description: "本地模拟的 Internet Explorer。", kind: "browser" },
+  { id: "blog", title: "个人博客", icon: BlogIcon, description: "本地个人主页和示例文章。", kind: "blog" },
 ]
 
 export function getDesktopApp(id: string) {

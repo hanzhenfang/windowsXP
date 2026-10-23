@@ -45,11 +45,7 @@ function hdlClickAvatar() {
   } else {
     isLoginSuccess.value = true
     loadingTimer = window.setTimeout(() => {
-      if (isMobile.value) {
-        router.push({ name: "desktop" })
-      } else {
-        window.open("https://juejin.cn/user/3065861918435437")
-      }
+      router.push({ name: "desktop" })
     }, 2200)
   }
 }

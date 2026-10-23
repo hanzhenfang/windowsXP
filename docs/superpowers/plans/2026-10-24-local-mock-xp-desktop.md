@@ -72,18 +72,19 @@ flowchart LR
 **Interfaces:**
 - `MockEntry`: `{ id: string; parentId: string | null; name: string; kind: 'folder' | 'file'; type: string; size: number; modifiedAt: number; content?: string; system?: boolean }`.
 - `FilesystemSnapshot`: `{ version: 1; entries: MockEntry[]; recycleBin: MockEntry[] }`.
-- `filesystemService`: `load(): FilesystemSnapshot`, `list(parentId: string): MockEntry[]`, `createFolder(parentId: string, name: string): MockEntry`, `createFile(parentId: string, name: string, content: string): MockEntry`, `rename(id: string, name: string): void`, `moveToRecycleBin(id: string): void`, `restore(id: string): void`, `emptyRecycleBin(): void`, `read(id: string): MockEntry | undefined`.
+- `filesystemService`: `load(): FilesystemSnapshot`, `list(parentId: string): MockEntry[]`, `createFolder(parentId: string, name: string): MockEntry`, `createFile(parentId: string, name: string, content: string): MockEntry`, `rename(id: string, name: string): void`, `moveToRecycleBin(id: string): void`, `restore(id: string): void`, `permanentlyDelete(id: string): void`, `emptyRecycleBin(): void`, `read(id: string): MockEntry | undefined`.
 - `useFilesystemStore`: reactive snapshot plus actions that call `filesystemService` and refresh store state.
 - `localStorage` key: `windows-xp-mock:filesystem`; malformed/unknown versions load the seed and replace invalid persisted data.
 - Seed `我的电脑`, `C:` and `D:` mock drives, `我的文档`, `桌面`, `图片收藏`, `音乐`, and clearly marked sample TXT/JPG/MP3 entries.
 - Moving a folder to the Recycle Bin moves its full descendant subtree as one restorable unit; restoring returns the subtree to its original parent. Permanent deletion removes the subtree.
 - Names are case-insensitively unique within one parent. Reject empty names, path separators, `.` and `..`; never overwrite an existing entry.
 
-- [ ] Define the filesystem types and v1 seed tree.
-- [ ] Implement load/parse/validate/default behavior in the storage adapter.
-- [ ] Implement local create/list/read/rename/delete/restore/empty operations and same-folder name conflict rules.
-- [ ] Connect Pinia store actions to the service and expose computed folder contents/counts.
-- [ ] Run the project's type-check and production build; inspect persisted values manually in browser devtools during UI integration.
+- [x] Define the filesystem types and v1 seed tree.
+- [x] Implement load/parse/validate/default behavior in the storage adapter.
+- [x] Implement local create/list/read/rename/delete/restore/empty operations and same-folder name conflict rules.
+- [x] Connect Pinia store actions to the service and expose computed folder contents/counts.
+- [x] Run the project's type-check and production build.
+- [ ] Inspect persisted values manually in browser devtools during UI integration.
 
 ## Task 2: Desktop shell, icons, menus, and taskbar behavior
 

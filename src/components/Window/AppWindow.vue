@@ -43,6 +43,8 @@ function moveDrag(event: PointerEvent) {
       </template>
       <template v-else-if="window.appId === 'recycle'"><div class="xp-empty">🗑️<p>{{ app?.description }}</p></div></template>
       <template v-else-if="window.appId === 'network'"><h2>网络任务</h2><p>查看网络连接、设置家庭或小型办公网络。</p><div class="xp-network-card">🌐　局域网或高速 Internet</div></template>
+      <template v-else-if="window.appId === 'browser'"><div class="xp-browser-placeholder"><div>🌐</div><h2>Internet Explorer</h2><p>浏览器将在本地打开模拟页面，不会连接外网。</p><button @click="store.closeWindow(window.id)">关闭窗口</button></div></template>
+      <template v-else-if="window.appId === 'blog'"><div class="xp-browser-placeholder"><h2>韩振方的个人主页</h2><p>本地示例主页</p><p>文章内容将在个人博客模块中补齐。</p></div></template>
     </div>
     <footer class="xp-window-status">对象: {{ window.appId === 'computer' ? '2' : '0' }}</footer>
   </section>

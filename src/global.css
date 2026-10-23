@@ -64,6 +64,10 @@ button { color: inherit; font: inherit; }
 .xp-drive-grid span { grid-row: span 2; font-size: 3rem; }.xp-drive-grid small { color: #777; }
 .xp-empty { display: grid; place-content: center; height: 100%; color: #777; text-align: center; font-size: 3.5rem; }.xp-empty p { margin-top: 1rem; font-size: 1.4rem; }
 .xp-network-card { margin-top: 1.5rem; padding: 1.2rem; background: #eff5ff; border: 1px solid #b5cceb; }
+.xp-browser-placeholder { display: grid; justify-items: center; gap: 1rem; padding: 4rem 1rem; color: #444; text-align: center; }
+.xp-browser-placeholder > div { font-size: 5rem; }
+.xp-browser-placeholder h2 { width: 100%; }
+.xp-browser-placeholder button { padding: .7rem 1.5rem; border: 1px solid #777; border-radius: .3rem; background: linear-gradient(#fff,#ddd); color: #222; cursor: pointer; }
 .xp-window-status { height: 2.2rem; flex: 0 0 2.2rem; padding: .4rem 1rem; border-top: 1px solid #d0d0d0; color: #555; font-size: 1.1rem; }
 .xp-context-menu { position: absolute; z-index: 21000; width: 19rem; padding: .4rem; border: 1px solid #777; background: #f4f4f4; color: #222; box-shadow: 2px 3px 7px #0006; }
 .xp-context-menu button { display: block; width: 100%; padding: .6rem .9rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: default; }

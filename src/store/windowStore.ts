@@ -25,10 +25,6 @@ export const useWindowStore = defineStore("windows", {
     openApp(appId: string) {
       const app = getDesktopApp(appId)
       if (!app) return
-      if (app.externalUrl) {
-        window.open(app.externalUrl, "_blank", "noopener,noreferrer")
-        return
-      }
       const existing = this.windows.find((window) => window.appId === appId)
       if (existing) {
         existing.minimized = false

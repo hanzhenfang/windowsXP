@@ -4,7 +4,6 @@ import { useRootStore } from "@/store/rootStore"
 import { storeToRefs } from "pinia"
 
 import { showDownIconGroup } from "@/pages/DeskTop/IconGroup/iconGroup"
-import { openPersonalJueJin } from "@/utils/openJueJin"
 
 import type { CSSProperties } from "vue"
 
@@ -48,7 +47,6 @@ nextTick(() => {
       </div>
 
       <div
-        @click.stop="openPersonalJueJin"
         class="w-full grow flex px-10% bg-#7F9AEF border-y-2px border-white"
       >
         <div
