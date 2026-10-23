@@ -5,6 +5,8 @@ import ExplorerApp from "@/components/apps/ExplorerApp.vue"
 import RecycleBinApp from "@/components/apps/RecycleBinApp.vue"
 import NetworkPlacesApp from "@/components/apps/NetworkPlacesApp.vue"
 import NetworkConnectionsApp from "@/components/apps/NetworkConnectionsApp.vue"
+import InternetExplorerApp from "@/components/apps/InternetExplorerApp.vue"
+import BlogApp from "@/components/apps/BlogApp.vue"
 
 const props = defineProps<{ window: WindowState; mobile: boolean }>()
 const store = useWindowStore()
@@ -68,15 +70,15 @@ function toggleFromTitle(event: MouseEvent) {
       </div>
     </header>
     <div v-if="window.appId !== 'computer'" class="xp-window-toolbar"><span>文件(F)</span><span>编辑(E)</span><span>查看(V)</span><span>收藏(A)</span><span>工具(T)</span><span>帮助(H)</span></div>
-    <div class="xp-window-content" :class="{ 'xp-explorer-window-content': window.appId === 'computer', 'xp-recycle-window-content': window.appId === 'recycle' }">
+    <div class="xp-window-content" :class="{ 'xp-explorer-window-content': window.appId === 'computer', 'xp-recycle-window-content': window.appId === 'recycle', 'xp-browser-window-content': window.appId === 'browser' || window.appId === 'blog' }">
       <template v-if="window.appId === 'computer'">
         <ExplorerApp :initial-folder-id="window.initialFolderId" />
       </template>
       <template v-else-if="window.appId === 'recycle'"><RecycleBinApp /></template>
       <template v-else-if="window.appId === 'network'"><NetworkPlacesApp /></template>
       <template v-else-if="window.appId === 'network-connections'"><NetworkConnectionsApp /></template>
-      <template v-else-if="window.appId === 'browser'"><div class="xp-browser-placeholder"><div>🌐</div><h2>Internet Explorer</h2><p>浏览器将在本地打开模拟页面，不会连接外网。</p><button @click="store.close(window.id)">关闭窗口</button></div></template>
-      <template v-else-if="window.appId === 'blog'"><div class="xp-browser-placeholder"><h2>韩振方的个人主页</h2><p>本地示例主页</p><p>文章内容将在个人博客模块中补齐。</p></div></template>
+      <template v-else-if="window.appId === 'browser'"><InternetExplorerApp :window-id="window.id" /></template>
+      <template v-else-if="window.appId === 'blog'"><BlogApp /></template>
     </div>
     <footer v-if="window.appId !== 'computer' && window.appId !== 'recycle'" class="xp-window-status">对象: 0</footer>
     <template v-if="!mobile && window.state === 'normal'">

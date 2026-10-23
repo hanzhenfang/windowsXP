@@ -71,6 +71,10 @@ export const useWindowStore = defineStore("windows", {
       target.zIndex = ++this.nextZIndex
       this.activeWindowId = id
     },
+    setWindowTitle(id: string, title: string) {
+      const target = this.windows.find((window) => window.id === id)
+      if (target) target.title = title
+    },
     minimize(id: string) {
       const target = this.windows.find((window) => window.id === id)
       if (!target) return

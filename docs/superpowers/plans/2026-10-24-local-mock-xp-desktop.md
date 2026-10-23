@@ -213,15 +213,15 @@ flowchart LR
 - IE state: tabs, active tab, address, back/forward history, favorites stored in preferences; search routes to local mock results.
 - Blog uses local profile summary and clearly labeled sample post content. Existing Juejin URL is shown as text only, never as a clickable outbound link.
 
-- [ ] Remove `externalUrl` launching and all `window.open` behavior from app manifest/window store.
-- [ ] Build local IE chrome (address field, back/forward, refresh, home, favorites, tabs) over local pages.
-- [ ] Build local blog profile, article list and mock article detail navigation.
-- [ ] Route unknown addresses to a local error page; confirm there are no remote requests or external browsing contexts.
+- [x] Remove `externalUrl` launching and all `window.open` behavior from app manifest/window store (completed in Task 1 under the global offline rule).
+- [x] Build local IE chrome (address field, back/forward, refresh, home, favorites, tabs) over local pages.
+- [x] Build local blog profile, article list and mock article detail navigation.
+- [x] Route unknown addresses to a local error page; confirm there are no remote requests or external browsing contexts.
 
 ## Task 8: Control Panel, appearance, and sound
 
 **Files:**
-- Create: `src/store/preferencesStore.ts`
+- Modify: `src/store/preferencesStore.ts` (introduced in Task 7 for browser favorites)
 - Create: `src/components/apps/ControlPanelApp.vue`
 - Create: `src/components/apps/DisplayPropertiesApp.vue`
 - Create: `src/components/apps/SoundPropertiesApp.vue`
