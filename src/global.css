@@ -83,6 +83,14 @@ button { color: inherit; font: inherit; }
 .xp-browser-placeholder h2 { width: 100%; }
 .xp-browser-placeholder button { padding: .7rem 1.5rem; border: 1px solid #777; border-radius: .3rem; background: linear-gradient(#fff,#ddd); color: #222; cursor: pointer; }
 .xp-window-status { height: 2.2rem; flex: 0 0 2.2rem; padding: .4rem 1rem; border-top: 1px solid #d0d0d0; color: #555; font-size: 1.1rem; }
+.xp-resize-handle { position: absolute; z-index: 3; touch-action: none; }
+.xp-resize-n, .xp-resize-s { left: .6rem; right: .6rem; height: .6rem; cursor: ns-resize; }
+.xp-resize-n { top: 0; }.xp-resize-s { bottom: 0; }
+.xp-resize-e, .xp-resize-w { top: .6rem; bottom: .6rem; width: .6rem; cursor: ew-resize; }
+.xp-resize-e { right: 0; }.xp-resize-w { left: 0; }
+.xp-resize-ne, .xp-resize-nw, .xp-resize-se, .xp-resize-sw { width: 1rem; height: 1rem; }
+.xp-resize-ne { top: 0; right: 0; cursor: nesw-resize; }.xp-resize-nw { top: 0; left: 0; cursor: nwse-resize; }
+.xp-resize-se { right: 0; bottom: 0; cursor: nwse-resize; }.xp-resize-sw { left: 0; bottom: 0; cursor: nesw-resize; }
 .xp-context-menu { position: absolute; z-index: 21000; width: 19rem; padding: .4rem; border: 1px solid #777; background: #f4f4f4; color: #222; box-shadow: 2px 3px 7px #0006; }
 .xp-context-menu button { display: block; width: 100%; padding: .6rem .9rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: default; }
 .xp-context-menu button:hover:not(:disabled) { background: #316ac5; color: white; }

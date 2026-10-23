@@ -65,8 +65,8 @@ function handleIconContextMenu(event: MouseEvent, item: { id: string; type: "app
 
 function closeContextMenu() { contextMenu.value = null }
 function openSelected() {
-  if (contextMenu.value?.appId) windows.openApp(contextMenu.value.appId)
-  if (contextMenu.value?.folderId) windows.openApp("computer")
+  if (contextMenu.value?.appId) windows.open(contextMenu.value.appId)
+  if (contextMenu.value?.folderId) windows.open("computer")
   closeContextMenu()
 }
 function renameSelected() {
@@ -101,14 +101,28 @@ function refreshDesktop() { desktop.selectedId = null; desktop.selectedIds = [];
 function sortDesktop() { desktop.sortAlphabetically = !desktop.sortAlphabetically; closeContextMenu() }
 function toggleIconSize() { desktop.iconSize = desktop.iconSize === "large" ? "small" : "large"; closeContextMenu() }
 function onDocumentKeyDown(event: KeyboardEvent) {
-  if (event.key === "Escape") closeContextMenu()
+  if (event.key === "Escape") {
+    closeContextMenu()
+    if (dialog.value.visible) dialog.value.visible = false
+  } else if (event.altKey && event.key === "F4" && windows.activeWindowId) {
+    event.preventDefault()
+    windows.close(windows.activeWindowId)
+  }
 }
 function isTextEntry(target: EventTarget | null) {
   return target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
 }
 function onDesktopKeyDown(event: KeyboardEvent) {
   if (isTextEntry(event.target)) return
-  if (event.key === "F2" && desktop.selectedIds.length === 1) {
+  if (event.key === "Enter" && (event.target as HTMLElement).closest(".desktop-icon")) {
+    const icon = (event.target as HTMLElement).closest<HTMLElement>(".desktop-icon")
+    const id = icon?.dataset.iconId
+    if (id) {
+      event.preventDefault()
+      if (desktopApps.some((app) => app.id === id)) windows.open(id)
+      else windows.open("computer")
+    }
+  } else if (event.key === "F2" && desktop.selectedIds.length === 1) {
     const id = desktop.selectedIds[0]
     const app = desktopApps.find((item) => item.id === id)
     if ((app && !app.system) || filesystem.entryById(id)) {
@@ -196,28 +210,30 @@ function requestPower() { shutdownModal.present() }
 onMounted(() => {
   document.addEventListener("keydown", onDocumentKeyDown)
   document.addEventListener("click", onDocumentClick)
+  window.addEventListener("resize", windows.resizeForViewport, { passive: true })
   play(audio.value)
 })
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", onDocumentKeyDown)
   document.removeEventListener("click", onDocumentClick)
+  window.removeEventListener("resize", windows.resizeForViewport)
   if (shutdownModal.isShow.value) shutdownModal.dismiss()
 })
 </script>
 
 <template>
   <div id="desktop-shell" class="xp-desktop" :class="desktopClass" :style="{ backgroundImage: `url(${DeskBg})` }" @contextmenu.prevent="handleBlankContextMenu" @pointerdown="beginMarquee" @pointermove="updateMarquee" @pointerup="endMarquee" @pointercancel="endMarquee" @click.self="refreshDesktop" @keydown="onDesktopKeyDown" tabindex="0">
-    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.openApp($event)" @open-folder="windows.openApp('computer')" @context-icon="handleIconContextMenu" />
+    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.open($event)" @open-folder="windows.open('computer')" @context-icon="handleIconContextMenu" />
     <TransitionGroup v-if="!mobile" name="xp-window-transition">
       <AppWindow v-for="window in windows.visibleWindows" :key="window.id" :window="window" :mobile="false" />
     </TransitionGroup>
     <Transition v-else name="xp-window-transition">
-      <AppWindow v-if="windows.activeWindow && !windows.activeWindow.minimized" :key="windows.activeWindow.id" :window="windows.activeWindow" :mobile="true" />
+      <AppWindow v-if="windows.activeWindow && windows.activeWindow.state !== 'minimized'" :key="windows.activeWindow.id" :window="windows.activeWindow" :mobile="true" />
     </Transition>
     <DesktopContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" :app="selectedApp" :folder="!!selectedFolder" @open="openSelected" @refresh="refreshDesktop" @sort="sortDesktop" @view="toggleIconSize" @new-folder="createDesktopFolder" @rename="renameSelected" @delete="deleteSelected" @properties="showProperties" />
     <DesktopActionDialog v-model="dialog.visible" :title="dialog.title" :message="dialog.message" :mode="dialog.mode" :initial-value="dialog.initialValue" @confirm="applyDialog" />
     <div v-if="selectionBox" class="xp-selection-marquee" :style="{ left: `${selectionBox.left}px`, top: `${selectionBox.top}px`, width: `${selectionBox.width}px`, height: `${selectionBox.height}px` }"></div>
-    <Taskbar @launch="windows.openApp($event)" @power="requestPower" />
+    <Taskbar @launch="windows.open($event)" @power="requestPower" />
     <audio ref="audio" :src="LoginAudio" preload="auto"></audio>
   </div>
 </template>

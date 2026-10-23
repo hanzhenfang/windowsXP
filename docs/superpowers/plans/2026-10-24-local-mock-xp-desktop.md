@@ -128,11 +128,11 @@ flowchart LR
 - Default one instance per app except simulated IE, which supports multiple tabs in one app window; prevent duplicate `open()` for singleton apps.
 - Mobile maps the active window to the app viewport and keeps taskbar navigation available.
 
-- [ ] Implement store transitions and one-instance-per-app policy.
-- [ ] Implement pointer-based drag and resize, clamped to viewport and taskbar bounds.
-- [ ] Implement title-bar double-click maximize/restore and XP caption buttons.
-- [ ] Connect taskbar state to minimize/restore/focus and test rapid window transitions manually.
-- [ ] Add keyboard behaviors: Escape closes menus/dialogs, Alt+F4 closes active window, and Enter activates focused desktop icon.
+- [x] Implement store transitions and one-instance-per-app policy.
+- [x] Implement pointer-based drag and resize, clamped to viewport and taskbar bounds.
+- [x] Implement title-bar double-click maximize/restore and XP caption buttons.
+- [x] Connect taskbar state to minimize/restore/focus and test rapid window transitions manually.
+- [x] Add keyboard behaviors: Escape closes menus/dialogs, Alt+F4 closes active window, and Enter activates focused desktop icon.
 
 ## Task 4: Explorer and mock file operations
 

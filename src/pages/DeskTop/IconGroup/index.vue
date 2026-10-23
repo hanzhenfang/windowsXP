@@ -40,11 +40,11 @@ function focusRelative(event: KeyboardEvent, offset: number) {
 
 <template>
   <div class="desktop-icons" :class="{ 'desktop-icons-mobile': mobile }" @click.self="emit('select', null)">
-    <button v-for="item in apps" :key="item.id" :data-icon-id="item.id" class="desktop-icon" :class="{ selected: selectedIds.includes(item.id) }" @click.stop="activateApp(item.id, $event)" @keydown.enter="emit('open-app', item.id)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: item.id, type: 'app' })">
+    <button v-for="item in apps" :key="item.id" :data-icon-id="item.id" class="desktop-icon" :class="{ selected: selectedIds.includes(item.id) }" @click.stop="activateApp(item.id, $event)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: item.id, type: 'app' })">
       <img :src="item.icon" :alt="item.title" draggable="false" />
       <span>{{ item.title }}</span>
     </button>
-    <button v-for="folder in folders" :key="folder.id" :data-icon-id="folder.id" class="desktop-icon" :class="{ selected: selectedIds.includes(folder.id) }" @click.stop="activateFolder(folder)" @keydown.enter="emit('open-folder', folder.id)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: folder.id, type: 'folder' })">
+    <button v-for="folder in folders" :key="folder.id" :data-icon-id="folder.id" class="desktop-icon" :class="{ selected: selectedIds.includes(folder.id) }" @click.stop="activateFolder(folder)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: folder.id, type: 'folder' })">
       <span class="desktop-folder-icon" aria-hidden="true">📁</span>
       <span>{{ folder.name }}</span>
     </button>
