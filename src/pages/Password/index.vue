@@ -9,7 +9,7 @@ import LoginFooter from "@/pages/Password/LoginFooter/index.vue"
 import IconCombination from "@/components/IconCombination/index.vue"
 
 import { useRootStore } from "@/store/rootStore"
-import { ShutDownModalCreator } from "@/components/Modal/ShutDown/index"
+import { usePowerStore } from "@/store/powerStore"
 
 // some options constants
 const loadingDurationTime: number = 4000 // control IconCombination duration
@@ -20,7 +20,7 @@ const { isMobile } = storeToRefs(rootStore)
 
 const iconWrapper = ref<HTMLDivElement>()
 const iconWrapperOffsetWidth = ref()
-const shutDownModal = new ShutDownModalCreator()
+const power = usePowerStore()
 let loadingTimer = 0
 let startupTimer = 0
 
@@ -44,6 +44,7 @@ function hdlClickAvatar() {
     isChoice.value = true
   } else {
     isLoginSuccess.value = true
+    power.setStatus("running")
     loadingTimer = window.setTimeout(() => {
       router.push({ name: "desktop" })
     }, 2200)
@@ -69,11 +70,7 @@ function hdlClickBackBtn() {
     isChoice.value = false
     isLoginSuccess.value = false
   } else {
-    if (shutDownModal.isShow.value) {
-      shutDownModal.dismiss()
-      return
-    }
-    shutDownModal.present()
+    power.openDialog()
   }
 }
 
@@ -164,7 +161,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div v-else class="w-full h-full flex items-center">
-            <PCLogin :shutDownModal="shutDownModal.isShow" />
+            <PCLogin :powerDialogOpen="power.dialogOpen" />
           </div>
         </div>
       </div>

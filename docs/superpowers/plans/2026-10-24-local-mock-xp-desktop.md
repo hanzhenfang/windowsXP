@@ -245,6 +245,11 @@ flowchart LR
 
 **Files:**
 - Create: `src/store/powerStore.ts`
+- Create: `src/components/desktop/PowerOverlay.vue`
+- Modify: `src/App.vue`
+- Modify: `src/components/desktop/StartMenu.vue`
+- Modify: `src/components/desktop/Taskbar.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
 - Modify: `src/components/Modal/ShutDown/ShutDown.vue`
 - Modify: `src/components/Modal/ShutDown/index.ts`
 - Modify: `src/pages/Password/index.vue`
@@ -255,10 +260,10 @@ flowchart LR
 - Restart/log-off return to existing local loading/password routes; sleep shows a local wake overlay; shutdown shows local power-off screen with a wake/restart action.
 - No OS shutdown API or external navigation is called.
 
-- [ ] Replace current modal side effects with typed local power actions.
-- [ ] Implement XP-style shut down choices: Stand By, Turn Off, Restart, Cancel; mobile uses touch-friendly dialog.
-- [ ] Connect taskbar Start Menu power commands and route transitions.
-- [ ] Verify cancel, sleep/wake, logoff, restart and shutdown/wake all remain in the app.
+- [x] Replace current modal side effects with typed local power actions.
+- [x] Implement XP-style shut down choices: Stand By, Turn Off, Restart, Cancel; mobile uses touch-friendly dialog.
+- [x] Connect taskbar Start Menu power commands and route transitions.
+- [x] Verify cancel, sleep/wake, logoff, restart and shutdown/wake all remain in the app.
 
 ## Task 10: Integration and offline review
 

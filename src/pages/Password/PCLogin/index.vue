@@ -7,17 +7,18 @@ import {
   nextTick,
   onBeforeUnmount,
   CSSProperties,
-  Ref,
 } from "vue"
 import { useRouter } from "vue-router"
 
 import { sleep } from "@/utils/sleep"
+import { usePowerStore } from "@/store/powerStore"
 
 const props = defineProps<{
-  shutDownModal: Ref<boolean>
+  powerDialogOpen: boolean
 }>()
 
 const router = useRouter()
+const power = usePowerStore()
 
 const wrapper = ref<HTMLDivElement>()
 const avatarBox = ref<HTMLDivElement>()
@@ -69,7 +70,7 @@ function collectSlideData() {
 }
 
 function onMouseEnterAvatar() {
-  if (props.shutDownModal.value) return
+  if (props.powerDialogOpen) return
   if (isUnlockSuccess.value) return
   isHover.value = true
 }
@@ -109,6 +110,7 @@ function onMouseMove(e: PointerEvent) {
     avatarBox.value!.style.transform = `translateX(${_offset_X}px)`
     if (_offset_X === _MAX__OFFSET_DISTANCE) {
       isUnlockSuccess.value = true
+      power.setStatus("running")
       router.push({ name: "desktop" })
     }
   }

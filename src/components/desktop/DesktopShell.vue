@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { useRouter } from "vue-router"
 import { desktopApps } from "@/apps/manifest"
 import { useWindowStore } from "@/store/windowStore"
 import { useDesktopStore } from "@/store/desktopStore"
@@ -14,13 +15,15 @@ import DeskBg from "@/assets/deskbg.jpg"
 import DesktopBackground from "@/assets/desktopBackground.jpg"
 import LoginAudio from "@/assets/audio/login.mp3"
 import { usePreferencesStore } from "@/store/preferencesStore"
-import { ShutDownModalCreator } from "@/components/Modal/ShutDown"
+import { usePowerStore } from "@/store/powerStore"
 
 const props = withDefaults(defineProps<{ mobile?: boolean }>(), { mobile: false })
 const windows = useWindowStore()
 const desktop = useDesktopStore()
 const filesystem = useFilesystemStore()
 const preferences = usePreferencesStore()
+const power = usePowerStore()
+const router = useRouter()
 const { play } = useSystemAudio()
 const audio = ref<HTMLAudioElement>()
 const contextMenu = ref<{ x: number; y: number; appId?: string; folderId?: string } | null>(null)
@@ -42,7 +45,6 @@ const desktopClass = computed(() => ({
   [`xp-theme-${preferences.themeColor}`]: true,
 }))
 const wallpaper = computed(() => preferences.wallpaperId === "desktop-background" ? DesktopBackground : DeskBg)
-const shutdownModal = new ShutDownModalCreator()
 
 function positionContextMenu(event: MouseEvent, target?: { appId?: string; folderId?: string }) {
   const root = document.getElementById("desktop-shell")
@@ -219,7 +221,14 @@ function applyDialog(value: string) {
 function onDocumentClick(event: MouseEvent) {
   if (!(event.target as HTMLElement).closest(".xp-context-menu")) closeContextMenu()
 }
-function requestPower() { shutdownModal.present() }
+function requestPower() { power.openDialog() }
+function requestLogoff() {
+  power.closeDialog()
+  power.setStatus("logged-off")
+  windows.windows = []
+  windows.activeWindowId = null
+  void router.replace({ name: "password" })
+}
 
 onMounted(() => {
   document.addEventListener("keydown", onDocumentKeyDown)
@@ -232,7 +241,6 @@ onBeforeUnmount(() => {
   document.removeEventListener("keydown", onDocumentKeyDown)
   document.removeEventListener("click", onDocumentClick)
   window.removeEventListener("resize", windows.resizeForViewport)
-  if (shutdownModal.isShow.value) shutdownModal.dismiss()
 })
 </script>
 
@@ -248,7 +256,7 @@ onBeforeUnmount(() => {
     <DesktopContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" :app="selectedApp" :folder="!!selectedFolder" @open="openSelected" @refresh="refreshDesktop" @sort="sortDesktop" @view="toggleIconSize" @new-folder="createDesktopFolder" @rename="renameSelected" @delete="deleteSelected" @properties="showProperties" />
     <DesktopActionDialog v-model="dialog.visible" :title="dialog.title" :message="dialog.message" :mode="dialog.mode" :initial-value="dialog.initialValue" @confirm="applyDialog" />
     <div v-if="selectionBox" class="xp-selection-marquee" :style="{ left: `${selectionBox.left}px`, top: `${selectionBox.top}px`, width: `${selectionBox.width}px`, height: `${selectionBox.height}px` }"></div>
-    <Taskbar @launch="windows.open($event)" @power="requestPower" />
+    <Taskbar @launch="windows.open($event)" @power="requestPower" @logoff="requestLogoff" />
     <audio ref="audio" :src="LoginAudio" preload="auto"></audio>
   </div>
 </template>

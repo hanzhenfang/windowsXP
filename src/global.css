@@ -244,6 +244,41 @@ button { color: inherit; font: inherit; }
 .xp-volume-tray-button { min-width: 2.6rem; height: 2.8rem; border: 0; background: transparent; cursor: pointer; font-size: 1.6rem; }
 .xp-taskbar-theme-olive { background: linear-gradient(#73943f 0%,#668533 48%,#4d6920 100%) !important; border-color: #a5c875 !important; }
 .xp-taskbar-theme-silver { background: linear-gradient(#929eac 0%,#768292 48%,#596575 100%) !important; border-color: #c8d0da !important; }
+.xp-start-bottom > div { display: flex; gap: .5rem; }
+.xp-power-layer { position: fixed; z-index: 50000; inset: 0; display: grid; place-items: center; padding: 1.5rem; background: rgba(0,8,35,.48); backdrop-filter: grayscale(.45); }
+.xp-power-dialog { width: min(48rem,96vw); overflow: hidden; border: 1px solid #0b327e; border-radius: .8rem .8rem .3rem .3rem; background: #eaf0fa; color: #222; box-shadow: 0 1rem 3rem #06163399; font-size: 1.25rem; }
+.xp-power-dialog > header { height: 5rem; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; color: #fff; background: linear-gradient(90deg,#123c94,#3479d8 58%,#1550ac); font-size: 1.7rem; font-weight: 700; text-shadow: 1px 1px #123; }
+.xp-power-dialog > header img { width: 3.6rem; height: 3.6rem; object-fit: contain; }
+.xp-power-dialog > p { padding: 1.3rem 1.5rem .5rem; color: #394656; }
+.xp-power-options { display: grid; gap: .6rem; padding: .8rem 1.5rem 1.3rem; }
+.xp-power-options button { display: grid; grid-template-columns: 4rem 1fr; align-items: center; gap: .8rem; min-height: 6rem; padding: .7rem 1rem; border: 1px solid #bccbe0; background: linear-gradient(#fff,#edf3fa); color: #222; text-align: left; cursor: pointer; }
+.xp-power-options button:hover { border-color: #5786c2; background: #e1edfc; }
+.xp-power-option-icon { width: 3.5rem; height: 3.5rem; display: grid; place-items: center; border: 1px solid #9bb5d6; border-radius: .5rem; background: linear-gradient(#fff,#dae8f8); color: #1c5daf; font-size: 2.3rem; }
+.xp-power-options b, .xp-power-options small { display: block; }
+.xp-power-options b { margin-bottom: .3rem; color: #1f4f8b; font-size: 1.4rem; }
+.xp-power-options small { color: #59616c; }
+.xp-power-dialog > footer { display: flex; justify-content: flex-end; padding: .8rem 1.5rem; border-top: 1px solid #ccd5e1; background: #e1e8f1; }
+.xp-power-dialog > footer button, .xp-power-off button, .xp-power-sleep button { min-width: 8rem; min-height: 3rem; padding: .4rem 1rem; border: 1px solid #7e91aa; border-radius: .3rem; background: linear-gradient(#fff,#e2e7ed); color: #222; cursor: pointer; }
+.xp-power-sleep, .xp-power-off, .xp-power-restarting { position: fixed; z-index: 50001; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; padding: 2rem; color: white; text-align: center; }
+.xp-power-sleep { background: radial-gradient(ellipse at center,#233864ee,#080d1ef5); cursor: pointer; }
+.xp-power-sleep-card { display: grid; justify-items: center; gap: 1.2rem; }
+.xp-power-sleep-icon { color: #b7cdf1; font-size: 6rem; }
+.xp-power-sleep h1, .xp-power-off h1 { font-size: 2.4rem; text-shadow: 0 2px 5px #0009; }
+.xp-power-sleep p, .xp-power-off p { color: #e0e9f9; font-size: 1.4rem; }
+.xp-power-off, .xp-power-restarting { background: radial-gradient(ellipse at center,#1e58a8,#061b45 80%); }
+.xp-power-off > img, .xp-power-restarting > img { width: 8rem; height: 8rem; object-fit: contain; }
+.xp-power-off > div { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; margin-top: .8rem; }
+.xp-power-off button { border-color: #9dbbe1; background: linear-gradient(#fff,#dce8fa); color: #163d76; }
+.xp-power-restarting { font-size: 1.7rem; }
+.xp-power-restarting i { width: min(22rem,70vw); height: .8rem; overflow: hidden; border: 1px solid #c7d9f1; border-radius: 1rem; background: #102f61; }
+.xp-power-restarting i::after { content: ""; display: block; width: 45%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#61a2f8,#fff); animation: xp-power-progress 1s ease-in-out infinite alternate; }
+@keyframes xp-power-progress { from { transform: translateX(0); } to { transform: translateX(125%); } }
+@media (max-width: 600px) {
+  .xp-power-dialog-mobile { width: 100%; }
+  .xp-power-dialog-mobile > header { height: 4.5rem; }
+  .xp-power-options button { min-height: 6.8rem; }
+  .xp-power-off, .xp-power-sleep, .xp-power-restarting { padding: 1.5rem; }
+}
 .xp-theme-olive .xp-taskbar { background: linear-gradient(#73943f 0%,#668533 48%,#4d6920 100%); border-color: #a5c875; }
 .xp-theme-olive .xp-titlebar { background: linear-gradient(90deg,#4c6d26,#87a957 55%,#547833); }
 .xp-theme-olive .xp-start-all-programs { background: #e8efdb; }

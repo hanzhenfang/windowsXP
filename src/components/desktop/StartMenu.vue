@@ -3,7 +3,7 @@ import { computed, ref } from "vue"
 import { desktopApps } from "@/apps/manifest"
 import Avatar from "@/assets/avatar.jpg"
 
-const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void }>()
+const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void; (event: "logoff"): void }>()
 const query = ref("")
 const filteredApps = computed(() => {
   const text = query.value.trim().toLocaleLowerCase()
@@ -30,6 +30,6 @@ function launch(appId: string) {
         <p v-if="!filteredApps.length" class="xp-start-no-results">没有找到程序</p>
       </div>
     </div>
-    <footer class="xp-start-bottom"><span>Windows XP</span><button @click="emit('power')">关闭计算机</button></footer>
+    <footer class="xp-start-bottom"><span>Windows XP</span><div><button @click="emit('logoff')">注销</button><button @click="emit('power')">关闭计算机</button></div></footer>
   </section>
 </template>

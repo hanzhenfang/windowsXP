@@ -9,7 +9,7 @@ import StartMenu from "./StartMenu.vue"
 import { useSystemStore } from "@/store/systemStore"
 import { usePreferencesStore } from "@/store/preferencesStore"
 
-const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void }>()
+const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void; (event: "logoff"): void }>()
 const windows = useWindowStore()
 const root = useRootStore()
 const system = useSystemStore()
@@ -47,7 +47,7 @@ function toggleTaskWindow(id: string) {
 
 <template>
   <div class="xp-taskbar" :class="[`xp-taskbar-theme-${preferences.themeColor}`, { 'xp-taskbar-mobile': isMobile }]">
-    <Transition name="start-menu"><StartMenu v-if="isStartOpen" @launch="emit('launch', $event); isStartOpen = false" @power="emit('power'); isStartOpen = false" /></Transition>
+    <Transition name="start-menu"><StartMenu v-if="isStartOpen" @launch="emit('launch', $event); isStartOpen = false" @power="emit('power'); isStartOpen = false" @logoff="emit('logoff'); isStartOpen = false" /></Transition>
     <button class="xp-start-button" :class="{ active: isStartOpen }" aria-label="开始" @click="isStartOpen = !isStartOpen"><img :src="WindowsLogo" /><span>开始</span></button>
     <div class="xp-task-items">
       <button v-for="item in windows.taskbarWindows" :key="item.id" :class="{ active: windows.activeWindowId === item.id && item.state !== 'minimized' }" :title="item.title" @click="toggleTaskWindow(item.id)"><img :src="item.icon" /><span>{{ item.title }}</span></button>
