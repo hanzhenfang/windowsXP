@@ -31,14 +31,75 @@ function ensureUniqueName(snapshot: FilesystemSnapshot, parentId: string, name: 
 function collectSubtree(entries: MockEntry[], rootId: string) {
   const result: MockEntry[] = []
   const queue = [rootId]
+  const seen = new Set<string>()
   while (queue.length) {
     const id = queue.shift()!
+    if (seen.has(id)) continue
+    seen.add(id)
     const entry = entries.find((candidate) => candidate.id === id)
     if (!entry) continue
     result.push(entry)
     if (entry.kind === "folder") entries.filter((candidate) => candidate.parentId === id).forEach((child) => queue.push(child.id))
   }
   return result
+}
+
+function normalizeRoots(entries: MockEntry[], ids: string[]) {
+  const selected = [...new Set(ids)]
+  const entriesById = new Map(entries.map((entry) => [entry.id, entry]))
+  for (const id of selected) {
+    const entry = entriesById.get(id)
+    if (!entry) throw new FilesystemOperationError("所选项目已不存在。")
+    if (entry.system || entry.parentId === null) throw new FilesystemOperationError("此系统项目不能复制或移动。")
+  }
+  const selectedSet = new Set(selected)
+  return selected.filter((id) => {
+    let parentId = entriesById.get(id)?.parentId ?? null
+    const visited = new Set<string>()
+    while (parentId !== null && !visited.has(parentId)) {
+      if (selectedSet.has(parentId)) return false
+      visited.add(parentId)
+      parentId = entriesById.get(parentId)?.parentId ?? null
+    }
+    return true
+  })
+}
+
+function getTarget(snapshot: FilesystemSnapshot, targetParentId: string) {
+  const target = findEntry(snapshot, targetParentId)
+  if (!target || target.kind !== "folder") throw new FilesystemOperationError("目标文件夹不存在。")
+  return target
+}
+
+function getMoveRoots(snapshot: FilesystemSnapshot, ids: string[], targetParentId: string) {
+  getTarget(snapshot, targetParentId)
+  const rootIds = normalizeRoots(snapshot.entries, ids)
+  const entriesById = new Map(snapshot.entries.map((entry) => [entry.id, entry]))
+  const roots = rootIds.map((id) => entriesById.get(id)!)
+  const names = new Set<string>()
+  for (const root of roots) {
+    let ancestorId: string | null = targetParentId
+    const visited = new Set<string>()
+    while (ancestorId !== null && !visited.has(ancestorId)) {
+      if (ancestorId === root.id) throw new FilesystemOperationError("不能将文件夹移动到自身或其子文件夹中。")
+      visited.add(ancestorId)
+      ancestorId = entriesById.get(ancestorId)?.parentId ?? null
+    }
+    const normalizedName = root.name.toLocaleLowerCase()
+    if (names.has(normalizedName)) throw new FilesystemOperationError("目标位置将出现重名项目。")
+    names.add(normalizedName)
+    ensureUniqueName(snapshot, targetParentId, root.name, root.parentId === targetParentId ? root.id : undefined)
+  }
+  return roots
+}
+
+function copyName(snapshot: FilesystemSnapshot, parentId: string, sourceName: string, reservedNames: Set<string>) {
+  const taken = (name: string) => reservedNames.has(name.toLocaleLowerCase()) || snapshot.entries.some((entry) => entry.parentId === parentId && entry.name.toLocaleLowerCase() === name.toLocaleLowerCase())
+  const base = `${sourceName} - 副本`
+  if (!taken(base)) return base
+  let suffix = 2
+  while (taken(`${base} (${suffix})`)) suffix += 1
+  return `${base} (${suffix})`
 }
 
 function save(snapshot: FilesystemSnapshot) {
@@ -73,6 +134,52 @@ export const filesystemService = {
     snapshot.entries.push(entry)
     save(snapshot)
     return { ...entry }
+  },
+  copyEntries(ids: string[], targetParentId: string): MockEntry[] {
+    const snapshot = this.load()
+    getTarget(snapshot, targetParentId)
+    const rootIds = normalizeRoots(snapshot.entries, ids)
+    if (!rootIds.length) return []
+    const reservedNames = new Set<string>()
+    const idMap = new Map<string, string>()
+    const copied: MockEntry[] = []
+    const roots = rootIds.map((id) => findEntry(snapshot, id)!)
+    for (const root of roots) {
+      const subtree = collectSubtree(snapshot.entries, root.id)
+      for (const entry of subtree) idMap.set(entry.id, createId())
+      const rootName = copyName(snapshot, targetParentId, root.name, reservedNames)
+      reservedNames.add(rootName.toLocaleLowerCase())
+      for (const entry of subtree) {
+        const isRoot = entry.id === root.id
+        copied.push({
+          ...entry,
+          id: idMap.get(entry.id)!,
+          parentId: isRoot ? targetParentId : idMap.get(entry.parentId!) ?? entry.parentId,
+          name: isRoot ? rootName : entry.name,
+          system: false,
+          modifiedAt: Date.now(),
+          recycleGroupId: undefined,
+          originalParentId: undefined,
+          deletedAt: undefined,
+        })
+      }
+    }
+    snapshot.entries.push(...copied)
+    save(snapshot)
+    return copied.map((entry) => ({ ...entry }))
+  },
+  moveEntries(ids: string[], targetParentId: string): MockEntry[] {
+    const snapshot = this.load()
+    const roots = getMoveRoots(snapshot, ids, targetParentId)
+    if (!roots.length) return []
+    const moved: MockEntry[] = []
+    for (const root of roots) {
+      root.parentId = targetParentId
+      root.modifiedAt = Date.now()
+      moved.push(...collectSubtree(snapshot.entries, root.id).map((entry) => ({ ...entry })))
+    }
+    save(snapshot)
+    return moved
   },
   rename(id: string, name: string): void {
     const snapshot = this.load()

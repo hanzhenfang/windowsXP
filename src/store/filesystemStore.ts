@@ -14,6 +14,8 @@ export const useFilesystemStore = defineStore("filesystem", {
     refresh() { this.snapshot = filesystemService.load() },
     createFolder(parentId: string, name: string) { const entry = filesystemService.createFolder(parentId, name); this.refresh(); return entry },
     createFile(parentId: string, name: string, content: string) { const entry = filesystemService.createFile(parentId, name, content); this.refresh(); return entry },
+    copyEntries(ids: string[], targetParentId: string) { const entries = filesystemService.copyEntries(ids, targetParentId); this.refresh(); return entries },
+    moveEntries(ids: string[], targetParentId: string) { const entries = filesystemService.moveEntries(ids, targetParentId); this.refresh(); return entries },
     rename(id: string, name: string) { filesystemService.rename(id, name); this.refresh() },
     moveToRecycleBin(id: string) { filesystemService.moveToRecycleBin(id); this.refresh() },
     restore(id: string) { filesystemService.restore(id); this.refresh() },

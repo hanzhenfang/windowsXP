@@ -59,9 +59,9 @@
 - Desktop blank-area menu exposes grid sort modes and New Shortcut app picker; PC supports pointer drag; mobile retains flow grid.
 - Start Menu shows the latest five installed local apps and updates on every launch path.
 
-- [ ] Write and run failing tests `createsAndRemovesCustomShortcut`, `recordsRecentLaunchOnce`, `persistsIconPosition`, and `resetsManualLayout`.
-- [ ] Implement menu selection, shortcut rename/delete protection, app launch recents, sort modes, drag/drop positions and reset layout.
-- [ ] Verify keyboard selection/actions and mobile grid ignores PC coordinates; run focused interaction tests/build; commit `feat: complete XP desktop organization`.
+- [x] Write and run failing tests `createsAndRemovesCustomShortcut`, `recordsRecentLaunchOnce`, `persistsIconPosition`, and `resetsManualLayout`.
+- [x] Implement menu selection, shortcut rename/delete protection, app launch recents, sort modes, drag/drop positions and reset layout.
+- [x] Verify keyboard selection/actions and mobile grid ignores PC coordinates; run focused interaction tests/build; commit `feat: complete XP desktop organization`.
 
 ## Task 3: Atomic filesystem copy and move services
 
@@ -75,9 +75,9 @@
 - `filesystemStore.copyEntries/moveEntries` update Pinia state from the committed snapshot.
 - Selection normalization removes descendants whose ancestor is also selected. Name collisions fail before persistence; copy collisions produce `名称 - 副本`, then `名称 - 副本 (2)`.
 
-- [ ] Write and run failing service tests `copiesNestedFolderWithFreshIds`, `normalizesAncestorAndDescendantSelection`, `namesCopiesWithoutOverwrite`, `rejectsMoveIntoDescendant`, and `leavesSnapshotUnchangedAfterBatchConflict`.
-- [ ] Implement pre-validation and single-snapshot writes for copy/move, rejecting system roots and moving a folder into its own subtree.
-- [ ] Run service tests and production build; commit `feat: add atomic local file copy and move`.
+- [x] Write and run failing service tests `copiesNestedFolderWithFreshIds`, `normalizesAncestorAndDescendantSelection`, `namesCopiesWithoutOverwrite`, `rejectsMoveIntoDescendant`, and `leavesSnapshotUnchangedAfterBatchConflict`.
+- [x] Implement pre-validation and single-snapshot writes for copy/move, rejecting system roots and moving a folder into its own subtree.
+- [x] Run service tests and production build; commit `feat: add atomic local file copy and move`.
 
 ## Task 4: Explorer search, clipboard commands, and batch actions
 
