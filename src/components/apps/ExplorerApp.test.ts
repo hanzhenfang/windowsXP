@@ -30,6 +30,7 @@ describe("local Explorer workflows", () => {
 
     expect(wrapper.find('[data-file-id="sample-readme"]').exists()).toBe(true)
     expect(wrapper.find('[data-file-id="sample-blog-link"]').exists()).toBe(false)
+    expect(wrapper.find(".xp-explorer-status").text()).toContain("1 个对象")
   })
 
   it("doesNotHijackTextInputShortcuts", async () => {
@@ -41,6 +42,23 @@ describe("local Explorer workflows", () => {
 
     expect(wrapper.findAll(".xp-file-item.selected")).toHaveLength(1)
     expect((search.element as HTMLInputElement).value).toBe("xp")
+  })
+
+  it("opensSelectedFileWithEnter", async () => {
+    const wrapper = mountExplorer()
+    await wrapper.get('[data-file-id="sample-readme"]').trigger("click")
+    await pressOnMain(wrapper, "Enter")
+
+    expect(wrapper.get('[role="dialog"]').attributes("aria-label")).toBe("欢迎使用 Windows XP.txt")
+  })
+
+  it("opensContextMenuWithShiftF10", async () => {
+    const wrapper = mountExplorer()
+    await wrapper.get('[data-file-id="sample-readme"]').trigger("click")
+    await pressOnMain(wrapper, "F10", { shiftKey: true })
+
+    expect(wrapper.get(".xp-explorer-context").text()).toContain("复制(C)")
+    expect(wrapper.get(".xp-explorer-context").text()).toContain("打开(O)")
   })
 
   it("pastesCopiedItemsIntoCurrentFolder", async () => {

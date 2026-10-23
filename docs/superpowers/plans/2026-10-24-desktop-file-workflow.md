@@ -117,10 +117,10 @@
 - Modify: `src/global.css`, desktop and Explorer components touched above, `package.json`
 - Test: desktop, Explorer and backup regression suites
 
-- [ ] Cover keyboard open/menu/clipboard flows, visible focus, dialog labeling and touch-size controls in component tests where stable.
-- [ ] Add reduced-motion CSS behavior for desktop and window transitions.
-- [ ] Run the full regression suite, type check, production build, source scan for external request/navigation APIs, and manual PC/tablet/mobile browser walkthrough.
-- [ ] Commit `test: cover local desktop and Explorer workflows` and `a11y: improve XP desktop keyboard and motion support` as separate module commits.
+- [x] Cover keyboard open/menu/clipboard flows, visible focus, dialog labeling and touch-size controls in component tests where stable.
+- [x] Verify reduced-motion CSS behavior for desktop and window transitions.
+- [x] Run the full regression suite, type check, production build, source scan for external request/navigation APIs, and manual PC/tablet/mobile browser walkthrough.
+- [x] Commit `test: cover local desktop and Explorer workflows` and `a11y: improve XP desktop keyboard and motion support` as separate module commits.
 
 ## Task 7: Publish and verify Vercel production homepage
 
