@@ -18,6 +18,7 @@ export const useFilesystemStore = defineStore("filesystem", {
     moveEntries(ids: string[], targetParentId: string) { const entries = filesystemService.moveEntries(ids, targetParentId); this.refresh(); return entries },
     rename(id: string, name: string) { filesystemService.rename(id, name); this.refresh() },
     moveToRecycleBin(id: string) { filesystemService.moveToRecycleBin(id); this.refresh() },
+    moveEntriesToRecycleBin(ids: string[]) { filesystemService.moveEntriesToRecycleBin(ids); this.refresh() },
     restore(id: string) { filesystemService.restore(id); this.refresh() },
     permanentlyDelete(id: string) { filesystemService.permanentlyDelete(id); this.refresh() },
     emptyRecycleBin() { filesystemService.emptyRecycleBin(); this.refresh() },

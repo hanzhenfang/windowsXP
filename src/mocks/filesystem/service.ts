@@ -44,13 +44,13 @@ function collectSubtree(entries: MockEntry[], rootId: string) {
   return result
 }
 
-function normalizeRoots(entries: MockEntry[], ids: string[]) {
+function normalizeRoots(entries: MockEntry[], ids: string[], allowSystemFiles = false) {
   const selected = [...new Set(ids)]
   const entriesById = new Map(entries.map((entry) => [entry.id, entry]))
   for (const id of selected) {
     const entry = entriesById.get(id)
     if (!entry) throw new FilesystemOperationError("所选项目已不存在。")
-    if (entry.system || entry.parentId === null) throw new FilesystemOperationError("此系统项目不能复制或移动。")
+    if (entry.parentId === null || (entry.system && !(allowSystemFiles && entry.kind === "file"))) throw new FilesystemOperationError("此系统项目不能复制或移动。")
   }
   const selectedSet = new Set(selected)
   return selected.filter((id) => {
@@ -138,7 +138,7 @@ export const filesystemService = {
   copyEntries(ids: string[], targetParentId: string): MockEntry[] {
     const snapshot = this.load()
     getTarget(snapshot, targetParentId)
-    const rootIds = normalizeRoots(snapshot.entries, ids)
+    const rootIds = normalizeRoots(snapshot.entries, ids, true)
     if (!rootIds.length) return []
     const reservedNames = new Set<string>()
     const idMap = new Map<string, string>()
@@ -192,17 +192,26 @@ export const filesystemService = {
     save(snapshot)
   },
   moveToRecycleBin(id: string): void {
+    this.moveEntriesToRecycleBin([id])
+  },
+  moveEntriesToRecycleBin(ids: string[]): void {
     const snapshot = this.load()
-    const root = findEntry(snapshot, id)
-    if (!root || root.system || root.parentId === null) throw new FilesystemOperationError("此系统项目不能删除。")
-    const originalParentId = root.parentId
-    const deletedAt = Date.now()
-    const subtree = collectSubtree(snapshot.entries, id)
-    const subtreeIds = new Set(subtree.map((entry) => entry.id))
-    snapshot.entries = snapshot.entries.filter((entry) => !subtreeIds.has(entry.id))
-    snapshot.recycleBin.push(...subtree.map((entry) => entry.id === id
-      ? { ...entry, recycleGroupId: id, originalParentId, deletedAt }
-      : { ...entry, recycleGroupId: id, deletedAt }))
+    const roots = normalizeRoots(snapshot.entries, ids)
+    if (!roots.length) return
+    const movedIds = new Set<string>()
+    const recycled: MockEntry[] = []
+    for (const id of roots) {
+      const root = findEntry(snapshot, id)!
+      const originalParentId = root.parentId
+      const deletedAt = Date.now()
+      const subtree = collectSubtree(snapshot.entries, id)
+      subtree.forEach((entry) => movedIds.add(entry.id))
+      recycled.push(...subtree.map((entry) => entry.id === id
+        ? { ...entry, recycleGroupId: id, originalParentId, deletedAt }
+        : { ...entry, recycleGroupId: id, deletedAt }))
+    }
+    snapshot.entries = snapshot.entries.filter((entry) => !movedIds.has(entry.id))
+    snapshot.recycleBin.push(...recycled)
     save(snapshot)
   },
   restore(id: string): void {

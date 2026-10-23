@@ -296,6 +296,10 @@ button { color: inherit; font: inherit; }
 .xp-explorer { position: relative; flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; color: #222; background: #fff; font-size: 1.2rem; user-select: none; }
 .xp-explorer-toolbar { flex: 0 0 auto; padding: .5rem .7rem; border-bottom: 1px solid #c5cbd3; background: linear-gradient(#fafafa,#e6e8eb); }
 .xp-explorer-nav { min-width: 0; display: flex; align-items: center; gap: .4rem; }
+.xp-explorer-search { min-width: 9rem; width: min(16rem, 24vw); height: 2.4rem; padding: .3rem .6rem; border: 1px solid #9aa7b8; background: #fff; color: #222; }
+.xp-explorer-clipboard { display: flex; gap: .2rem; }
+.xp-explorer-clipboard button { min-height: 2.4rem; padding: .2rem .5rem; border: 1px solid #9aa7b8; background: linear-gradient(#fff,#e1e5ea); color: #333; cursor: pointer; }
+.xp-explorer-clipboard button:disabled { opacity: .45; cursor: default; }
 .xp-explorer-nav > button, .xp-explorer-view-toggle button { min-width: 2.6rem; height: 2.5rem; padding: 0 .5rem; border: 1px solid #9aa7b8; border-radius: .25rem; background: linear-gradient(#fff,#e1e5ea); color: #333; cursor: pointer; }
 .xp-explorer-nav > button:disabled { opacity: .45; cursor: default; }
 .xp-explorer-address { min-width: 0; flex: 1; display: flex; align-items: center; overflow: auto; padding: .2rem .4rem; border: 1px solid #aab5c3; background: #fff; white-space: nowrap; }
@@ -329,6 +333,12 @@ button { color: inherit; font: inherit; }
 .xp-explorer-empty { width: 100%; padding: 3rem; color: #777; text-align: center; }
 .xp-explorer-status { flex: 0 0 2.4rem; display: flex; align-items: center; justify-content: space-between; padding: 0 .9rem; border-top: 1px solid #c6cbd2; color: #555; background: #f6f6f6; }
 .xp-explorer-context { z-index: 25000; }
+@media (max-width: 700px) {
+  .xp-explorer-nav { flex-wrap: wrap; }
+  .xp-explorer-address { order: 1; flex: 1 0 100%; }
+  .xp-explorer-search { flex: 1; width: auto; }
+  .xp-explorer-sidebar { display: none; }
+}
 .xp-file-preview-backdrop { position: absolute; z-index: 26000; inset: 0; display: grid; place-items: center; padding: 1.5rem; background: #001a4d66; }
 .xp-file-preview { width: min(58rem, 94%); max-height: 90%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #083b8f; border-radius: .6rem; background: #f4f4f4; box-shadow: 2px 4px 15px #0007; }
 .xp-file-preview > header { flex: 0 0 3rem; display: flex; align-items: center; justify-content: space-between; padding: 0 .8rem 0 1rem; color: #fff; background: linear-gradient(90deg,#0b3da5,#3e80e7 55%,#1556c2); }

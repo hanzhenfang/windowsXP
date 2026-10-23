@@ -91,9 +91,9 @@
 - Explorer toolbar includes search; context/task actions include copy, cut, paste into the current folder, and delete selected.
 - Batch delete sends each selected root to Recycle Bin; store/service remains the source of truth.
 
-- [ ] Write and run failing component tests `searchesCurrentFolderSubtree`, `doesNotHijackTextInputShortcuts`, `pastesCopiedItemsIntoCurrentFolder`, `movesCutFolderWithDescendants`, and `deletesMultipleRootsOnce`.
-- [ ] Implement local search results, clipboard state, context-menu actions and keyboard shortcuts with safe selection clearing after mutation.
-- [ ] Run focused UI tests plus type check/build; commit `feat: complete local Explorer workflows`.
+- [x] Write and run failing component tests `searchesCurrentFolderSubtree`, `doesNotHijackTextInputShortcuts`, `pastesCopiedItemsIntoCurrentFolder`, `movesCutFolderWithDescendants`, and `deletesMultipleRootsOnce`.
+- [x] Implement local search results, clipboard state, context-menu actions and keyboard shortcuts with safe selection clearing after mutation.
+- [x] Run focused UI tests plus type check/build; commit `feat: complete local Explorer workflows`.
 
 ## Task 5: Media preview and validated local backup/restore
 
