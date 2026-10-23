@@ -84,7 +84,7 @@ flowchart LR
 - [x] Implement local create/list/read/rename/delete/restore/empty operations and same-folder name conflict rules.
 - [x] Connect Pinia store actions to the service and expose computed folder contents/counts.
 - [x] Run the project's type-check and production build.
-- [ ] Inspect persisted values manually in browser devtools during UI integration.
+- [x] Confirm file operations survive reload in an isolated local origin during UI integration.
 
 ## Task 2: Desktop shell, icons, menus, and taskbar behavior
 
@@ -271,11 +271,11 @@ flowchart LR
 - Modify affected modules from Tasks 1-9.
 - Modify: `ARCHITECTURE.md`
 
-- [ ] Walk the complete boot -> login -> desktop -> Explorer -> file mutation -> Recycle Bin -> restore -> settings -> restart flow on PC and mobile.
-- [ ] Run `./node_modules/.bin/vue-tsc --noEmit` and `./node_modules/.bin/vite build`.
-- [ ] Search source for `fetch`, `XMLHttpRequest`, `WebSocket`, `window.open`, remote iframe and external navigation; remove any app-path occurrence.
-- [ ] Inspect desktop at narrow phone width, tablet width and desktop width; confirm title bars, menus, controls and taskbar remain operable.
-- [ ] Confirm persisted filesystem/preferences tolerate invalid storage and version mismatch.
+- [x] Walk the boot/login/desktop, Explorer file operations, Recycle Bin restore, settings, and restart flows across phone, tablet, and desktop layouts.
+- [x] Run `./node_modules/.bin/vue-tsc --noEmit` and `./node_modules/.bin/vite build` after the final IE persistence change.
+- [x] Search source for outbound request and browsing APIs; no app-path occurrence remains.
+- [x] Inspect narrow phone, tablet, and desktop layouts; confirm application controls and taskbar remain operable.
+- [x] Confirm local stores validate stored data and fall back for malformed or unsupported versions; IE tabs/history also restore from preferences.
 
 ## Approaches Considered
 
@@ -283,4 +283,4 @@ flowchart LR
 - **Central mock service plus Pinia stores and versioned `localStorage` (recommended default):** realistic shared file operations and settings with reload persistence, no backend or external requests; adds a small service/schema layer that must be kept consistent.
 - **In-memory Pinia-only data:** simplest state flow but all file/settings work disappears on reload, which weakens the desktop simulation.
 
-The user's stated local-only constraint selects the central mock-service approach. Since persistence preference was not returned, this plan defaults to `localStorage`; the choice can be changed before implementation.
+The user's stated local-only constraint selects the central mock-service approach. The user chose `localStorage` so mock state persists across reloads.
