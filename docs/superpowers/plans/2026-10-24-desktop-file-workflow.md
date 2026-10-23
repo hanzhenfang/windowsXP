@@ -41,11 +41,11 @@
 - `loadDesktopPreferences(raw: string | null): DesktopPreferences` validates v1/v2 values and supplies safe defaults; legacy v1 values migrate without dropping names/hidden shortcuts.
 - Window layout persistence stores `{ appId, x, y, width, height }[]`; window session state remains transient. `open(appId)` applies the saved layout and `move`/`resize` saves it.
 
-- [ ] Add Vitest `0.34.6`, Vue Test Utils `2.4.6`, jsdom setup and package scripts (`test`, `test:watch`); run a runner smoke test before writing feature assertions.
-- [ ] Write and run failing tests named `migratesV1ShortcutState`, `fallsBackForMalformedDesktopState`, `keepsOnlyFiveRecentApps`, and `restoresWindowGeometryOnManualOpen`.
-- [ ] Implement v2 preference parsing and localStorage adapter with safe bounds for coordinates and labels.
-- [ ] Persist window geometry by app ID and restore it only on the next manual open; the new test must fail before the store change and pass after.
-- [ ] Run `pnpm test -- --run src/mocks/desktop/preferences.test.ts src/store/windowStore.test.ts` and `pnpm build`; commit `test: add desktop preference regression harness` / `feat: persist desktop preferences and window layouts` separately when boundaries are independently green.
+- [x] Add Vitest `0.34.6`, Vue Test Utils `2.4.6`, jsdom setup and package scripts (`test`, `test:watch`); run a runner smoke test before writing feature assertions.
+- [x] Write and run failing tests named `migratesV1ShortcutState`, `fallsBackForMalformedDesktopState`, `keepsOnlyFiveRecentApps`, and `restoresWindowGeometryOnManualOpen`.
+- [x] Implement v2 preference parsing and localStorage adapter with safe bounds for coordinates and labels.
+- [x] Persist window geometry by app ID and restore it only on the next manual open; the new test must fail before the store change and pass after.
+- [x] Run `pnpm test -- --run src/mocks/desktop/preferences.test.ts src/store/windowStore.test.ts` and `pnpm build`; commit `test: add desktop preference regression harness` / `feat: persist desktop preferences and window layouts` separately when boundaries are independently green.
 
 ## Task 2: Desktop ordering, shortcuts, recents, and pointer movement
 
