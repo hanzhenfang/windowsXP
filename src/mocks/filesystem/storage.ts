@@ -27,11 +27,13 @@ function isEntry(value: unknown): value is MockEntry {
   if (!value || typeof value !== "object") return false
   const entry = value as Partial<MockEntry>
   const hasValidDeletedAt = entry.deletedAt === undefined || (typeof entry.deletedAt === "number" && Number.isFinite(entry.deletedAt))
+  const hasValidRecycleGroup = entry.recycleGroupId === undefined || typeof entry.recycleGroupId === "string"
+  const hasValidOriginalParent = entry.originalParentId === undefined || entry.originalParentId === null || typeof entry.originalParentId === "string"
   return typeof entry.id === "string" && typeof entry.name === "string" &&
     (entry.parentId === null || typeof entry.parentId === "string") &&
     (entry.kind === "file" || entry.kind === "folder") && typeof entry.type === "string" &&
     typeof entry.size === "number" && Number.isFinite(entry.size) &&
-    typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt) && hasValidDeletedAt
+    typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt) && hasValidDeletedAt && hasValidRecycleGroup && hasValidOriginalParent
 }
 
 export function validateFilesystemSnapshot(value: unknown): value is FilesystemSnapshot {
@@ -42,10 +44,8 @@ export function validateFilesystemSnapshot(value: unknown): value is FilesystemS
   if (!all.every(isEntry)) return false
   const ids = new Set(all.map((entry) => entry.id))
   if (ids.size !== all.length) return false
-  const activeIds = new Set(snapshot.entries.map((entry) => entry.id))
-  const recycledIds = new Set(snapshot.recycleBin.map((entry) => entry.id))
-  const entriesById = new Map(snapshot.entries.map((entry) => [entry.id, entry]))
-  const activeTreeValid = snapshot.entries.every((entry) => {
+  const entriesById = new Map(all.map((entry) => [entry.id, entry]))
+  const treeValid = all.every((entry) => {
     if (entry.parentId === null) return true
     const parent = entriesById.get(entry.parentId)
     if (!parent || parent.kind !== "folder") return false
@@ -58,7 +58,21 @@ export function validateFilesystemSnapshot(value: unknown): value is FilesystemS
     }
     return true
   })
-  return activeTreeValid && snapshot.recycleBin.every((entry) => entry.parentId === null || recycledIds.has(entry.parentId) || activeIds.has(entry.parentId))
+  if (!treeValid) return false
+
+  const groups = new Map<string, MockEntry[]>()
+  for (const entry of snapshot.recycleBin) {
+    if (entry.deletedAt === undefined || !entry.recycleGroupId) return false
+    const group = groups.get(entry.recycleGroupId) ?? []
+    group.push(entry)
+    groups.set(entry.recycleGroupId, group)
+  }
+  for (const [groupId, members] of groups) {
+    const root = members.find((entry) => entry.id === groupId)
+    if (!root || root.recycleGroupId !== root.id || root.deletedAt === undefined || !root.originalParentId || root.parentId !== root.originalParentId) return false
+    if (members.some((entry) => entry.id !== root.id && entriesById.get(entry.parentId ?? "")?.recycleGroupId !== groupId)) return false
+  }
+  return true
 }
 
 function persist(snapshot: FilesystemSnapshot) {

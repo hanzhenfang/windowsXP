@@ -61,6 +61,34 @@ describe("local backup validation and restore", () => {
     expect(() => validateLocalBackup(missingParent)).toThrow()
   })
 
+  it("rejectsRecycleBinEntryWithNonFolderParent", () => {
+    const invalid = structuredClone(backupFixture)
+    invalid.filesystem.recycleBin = [
+      { id: "recycled-root", parentId: "file", name: "已删除.txt", kind: "file", type: "text/plain", size: 1, modifiedAt: 4, deletedAt: 5, recycleGroupId: "recycled-root", originalParentId: "folder" },
+    ]
+
+    expect(() => validateLocalBackup(invalid)).toThrow()
+  })
+
+  it("rejectsRecycleBinParentCycle", () => {
+    const invalid = structuredClone(backupFixture)
+    invalid.filesystem.recycleBin = [
+      { id: "recycled-root", parentId: "recycled-child", name: "已删除目录", kind: "folder", type: "folder", size: 0, modifiedAt: 4, deletedAt: 5, recycleGroupId: "recycled-root", originalParentId: "folder" },
+      { id: "recycled-child", parentId: "recycled-root", name: "子项.txt", kind: "file", type: "text/plain", size: 1, modifiedAt: 4, deletedAt: 5, recycleGroupId: "recycled-root" },
+    ]
+
+    expect(() => validateLocalBackup(invalid)).toThrow()
+  })
+
+  it("rejectsRecycleBinEntryWithoutGroupRoot", () => {
+    const invalid = structuredClone(backupFixture)
+    invalid.filesystem.recycleBin = [
+      { id: "orphan", parentId: "folder", name: "已删除.txt", kind: "file", type: "text/plain", size: 1, modifiedAt: 4, deletedAt: 5, recycleGroupId: "missing-root" },
+    ]
+
+    expect(() => validateLocalBackup(invalid)).toThrow()
+  })
+
   it("invalidImportDoesNotChangeStorage", () => {
     seedStorage()
     const before = Object.fromEntries([FILESYSTEM_STORAGE_KEY, DESKTOP_KEY, PREFERENCES_KEY, SYSTEM_KEY].map((key) => [key, localStorage.getItem(key)]))
