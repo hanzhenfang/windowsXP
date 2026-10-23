@@ -11,7 +11,9 @@ defineProps<{
 const emit = defineEmits<{
   (event: "open"): void
   (event: "refresh"): void
-  (event: "sort"): void
+  (event: "sort", mode: "manual" | "name" | "type"): void
+  (event: "reset-layout"): void
+  (event: "new-shortcut"): void
   (event: "view"): void
   (event: "new-folder"): void
   (event: "rename"): void
@@ -32,10 +34,19 @@ const emit = defineEmits<{
     </template>
     <template v-else>
       <button @click="emit('view')">查看(V)　›</button>
-      <button @click="emit('sort')">排列图标方式(O)　›</button>
+      <div class="xp-context-submenu">
+        <button aria-haspopup="true">排列图标方式(O)　›</button>
+        <div class="xp-context-submenu-items">
+          <button @click="emit('sort', 'name')">按名称</button>
+          <button @click="emit('sort', 'type')">按类型</button>
+          <button @click="emit('sort', 'manual')">手动排列</button>
+          <button @click="emit('reset-layout')">自动排列</button>
+        </div>
+      </div>
       <button @click="emit('refresh')">刷新(E)</button>
       <hr />
       <button @click="emit('new-folder')">新建文件夹(W)</button>
+      <button @click="emit('new-shortcut')">新建快捷方式(S)</button>
       <hr />
       <button @click="emit('properties')">属性(R)</button>
     </template>

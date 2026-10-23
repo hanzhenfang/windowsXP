@@ -10,6 +10,7 @@ import IconGroup from "@/pages/DeskTop/IconGroup/index.vue"
 import AppWindow from "@/components/Window/AppWindow.vue"
 import Taskbar from "./Taskbar.vue"
 import DesktopContextMenu from "./DesktopContextMenu.vue"
+import ShortcutPickerDialog from "./ShortcutPickerDialog.vue"
 import DesktopActionDialog from "./DesktopActionDialog.vue"
 import DeskBg from "@/assets/deskbg.jpg"
 import DesktopBackground from "@/assets/desktopBackground.jpg"
@@ -30,12 +31,20 @@ const contextMenu = ref<{ x: number; y: number; appId?: string; folderId?: strin
 const dialog = ref({ visible: false, mode: "message" as "input" | "confirm" | "message", title: "", message: "", initialValue: "", action: "" as "rename" | "new-folder" | "delete" | "properties" | "error", appId: "", folderId: "" })
 const selectionBox = ref<{ left: number; top: number; width: number; height: number } | null>(null)
 const selectionStart = ref<{ x: number; y: number; clientX: number; clientY: number } | null>(null)
-const selectedApp = computed(() => contextMenu.value?.appId ? desktopApps.find((app) => app.id === contextMenu.value?.appId) : undefined)
+const shortcutPickerVisible = ref(false)
+const selectedApp = computed(() => contextMenu.value?.appId ? sortedApps.value.find((app) => app.id === contextMenu.value?.appId) : undefined)
 const selectedFolder = computed(() => contextMenu.value?.folderId ? filesystem.entryById(contextMenu.value.folderId) : undefined)
 const sortedApps = computed(() => {
   const hidden = new Set(desktop.shortcuts.hidden)
-  const visible = desktopApps.filter((app) => app.desktopVisible !== false && !hidden.has(app.id)).map((app) => ({ ...app, title: desktop.shortcuts.titles[app.id] ?? app.title }))
-  return desktop.sortAlphabetically ? visible.sort((a, b) => a.title.localeCompare(b.title, "zh-CN")) : visible
+  const visible = desktopApps.filter((app) => app.desktopVisible !== false && !hidden.has(app.id)).map((app) => ({ ...app, title: desktop.shortcuts.titles[app.id] ?? app.title, launchAppId: app.id }))
+  const custom = desktop.shortcuts.custom.flatMap((shortcut) => {
+    const app = desktopApps.find((candidate) => candidate.id === shortcut.appId)
+    return app ? [{ ...app, id: shortcut.id, title: shortcut.title, launchAppId: app.id, system: false }] : []
+  })
+  const items = [...visible, ...custom]
+  if (desktop.shortcuts.sortMode === "name") return items.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"))
+  if (desktop.shortcuts.sortMode === "type") return items.sort((a, b) => a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title, "zh-CN"))
+  return items
 })
 const desktopFolders = computed(() => filesystem.childrenOf("desktop-folder").filter((entry) => entry.kind === "folder"))
 const recycleCount = computed(() => filesystem.recycleBinEntries.length)
@@ -52,7 +61,7 @@ function positionContextMenu(event: MouseEvent, target?: { appId?: string; folde
   if (!bounds) return
   contextMenu.value = {
     x: Math.max(0, Math.min(event.clientX - bounds.left, bounds.width - 190)),
-    y: Math.max(0, Math.min(event.clientY - bounds.top, bounds.height - 205)),
+    y: Math.max(0, Math.min(event.clientY - bounds.top, bounds.height - 280)),
     ...target,
   }
 }
@@ -76,8 +85,8 @@ function handleIconContextMenu(event: MouseEvent, item: { id: string; type: "app
 
 function closeContextMenu() { contextMenu.value = null }
 function openSelected() {
-  if (contextMenu.value?.appId) windows.open(contextMenu.value.appId)
-  if (contextMenu.value?.folderId) windows.open("computer", contextMenu.value.folderId)
+  if (contextMenu.value?.appId) launchApp(selectedApp.value?.launchAppId ?? contextMenu.value.appId)
+  if (contextMenu.value?.folderId) launchApp("computer", contextMenu.value.folderId)
   closeContextMenu()
 }
 function renameSelected() {
@@ -97,6 +106,8 @@ function createDesktopFolder() {
   closeContextMenu()
   dialog.value = { visible: true, mode: "input", title: "新建文件夹", message: "请输入文件夹名称：", initialValue: "新建文件夹", action: "new-folder", appId: "", folderId: "" }
 }
+function createDesktopShortcut() { closeContextMenu(); shortcutPickerVisible.value = true }
+function applyDesktopShortcut(appId: string) { try { desktop.createShortcut(appId) } catch (error) { showActionError(error) } }
 function showProperties() {
   const app = selectedApp.value
   const folder = selectedFolder.value
@@ -109,7 +120,8 @@ function showProperties() {
   dialog.value = { visible: true, mode: "message", title: "属性", message, initialValue: "", action: "properties", appId: "", folderId: "" }
 }
 function refreshDesktop() { desktop.selectedId = null; desktop.selectedIds = []; closeContextMenu() }
-function sortDesktop() { desktop.sortAlphabetically = !desktop.sortAlphabetically; closeContextMenu() }
+function sortDesktop(mode: "manual" | "name" | "type") { desktop.setSortMode(mode); closeContextMenu() }
+function resetDesktopLayout() { desktop.resetIconLayout(); closeContextMenu() }
 function toggleIconSize() {
   const size = preferences.iconSize === "large" ? "small" : "large"
   desktop.iconSize = size
@@ -135,22 +147,23 @@ function onDesktopKeyDown(event: KeyboardEvent) {
     const id = icon?.dataset.iconId
     if (id) {
       event.preventDefault()
-      if (desktopApps.some((app) => app.id === id)) windows.open(id)
-      else windows.open("computer")
+      const app = sortedApps.value.find((item) => item.id === id)
+      if (app) launchApp(app.launchAppId ?? app.id)
+      else if (filesystem.entryById(id)?.kind === "folder") launchApp("computer", id)
     }
   } else if (event.key === "F2" && desktop.selectedIds.length === 1) {
     const id = desktop.selectedIds[0]
-    const app = desktopApps.find((item) => item.id === id)
+    const app = sortedApps.value.find((item) => item.id === id)
     if ((app && !app.system) || filesystem.entryById(id)) {
       event.preventDefault()
-      contextMenu.value = { x: 0, y: 0, ...(desktopApps.some((app) => app.id === id) ? { appId: id } : { folderId: id }) }
+      contextMenu.value = { x: 0, y: 0, ...(app ? { appId: id } : { folderId: id }) }
       renameSelected()
     }
   } else if (event.key === "Delete" && desktop.selectedIds.length) {
     event.preventDefault()
     if (desktop.selectedIds.length === 1) {
       const id = desktop.selectedIds[0]
-      const app = desktopApps.find((item) => item.id === id)
+      const app = sortedApps.value.find((item) => item.id === id)
       const folder = filesystem.entryById(id)
       if (app || folder) {
         dialog.value = { visible: true, mode: "confirm", title: "确认删除", message: "确定要将此项目移到回收站吗？", initialValue: "", action: "delete", appId: app?.id ?? "", folderId: folder?.id ?? "" }
@@ -158,7 +171,7 @@ function onDesktopKeyDown(event: KeyboardEvent) {
       }
     }
     desktop.selectedIds.forEach((id) => {
-      if (desktopApps.some((app) => app.id === id)) {
+      if (sortedApps.value.some((app) => app.id === id)) {
         try { desktop.removeShortcut(id) } catch { /* Protected system shortcuts stay on the desktop. */ }
       } else if (filesystem.entryById(id)) filesystem.moveToRecycleBin(id)
     })
@@ -218,6 +231,13 @@ function applyDialog(value: string) {
     dialog.value = { ...dialog.value, visible: true, mode: "message", title: "无法完成操作", message: error instanceof Error ? error.message : "操作失败。", action: "error" }
   }
 }
+function showActionError(error: unknown) {
+  dialog.value = { visible: true, mode: "message", title: "无法完成操作", message: error instanceof Error ? error.message : "操作失败。", initialValue: "", action: "error", appId: "", folderId: "" }
+}
+function launchApp(appId: string, folderId?: string) {
+  desktop.recordRecentApp(appId)
+  windows.open(appId, folderId)
+}
 function onDocumentClick(event: MouseEvent) {
   if (!(event.target as HTMLElement).closest(".xp-context-menu")) closeContextMenu()
 }
@@ -246,17 +266,18 @@ onBeforeUnmount(() => {
 
 <template>
   <div id="desktop-shell" class="xp-desktop" :class="desktopClass" :style="{ backgroundImage: `url(${wallpaper})` }" @contextmenu.prevent="handleBlankContextMenu" @pointerdown="beginMarquee" @pointermove="updateMarquee" @pointerup="endMarquee" @pointercancel="endMarquee" @click.self="refreshDesktop" @keydown="onDesktopKeyDown" tabindex="0">
-    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :selected-ids="desktop.selectedIds" :recycle-count="recycleCount" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @open-app="windows.open($event)" @open-folder="windows.open('computer', $event)" @context-icon="handleIconContextMenu" />
+    <IconGroup :mobile="mobile" :apps="sortedApps" :folders="desktopFolders" :positions="desktop.shortcuts.iconPositions" :manual-layout="desktop.shortcuts.sortMode === 'manual'" :selected-ids="desktop.selectedIds" :recycle-count="recycleCount" @select="(id) => { desktop.selectedId = id; desktop.selectedIds = id ? [id] : [] }" @move-icon="desktop.setIconPosition" @open-app="launchApp" @open-folder="launchApp('computer', $event)" @context-icon="handleIconContextMenu" />
     <TransitionGroup v-if="!mobile" name="xp-window-transition">
       <AppWindow v-for="window in windows.visibleWindows" :key="window.id" :window="window" :mobile="false" />
     </TransitionGroup>
     <Transition v-else name="xp-window-transition">
       <AppWindow v-if="windows.activeWindow && windows.activeWindow.state !== 'minimized'" :key="windows.activeWindow.id" :window="windows.activeWindow" :mobile="true" />
     </Transition>
-    <DesktopContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" :app="selectedApp" :folder="!!selectedFolder" @open="openSelected" @refresh="refreshDesktop" @sort="sortDesktop" @view="toggleIconSize" @new-folder="createDesktopFolder" @rename="renameSelected" @delete="deleteSelected" @properties="showProperties" />
+    <DesktopContextMenu v-if="contextMenu" :x="contextMenu.x" :y="contextMenu.y" :app="selectedApp" :folder="!!selectedFolder" @open="openSelected" @refresh="refreshDesktop" @sort="sortDesktop" @reset-layout="resetDesktopLayout" @view="toggleIconSize" @new-folder="createDesktopFolder" @new-shortcut="createDesktopShortcut" @rename="renameSelected" @delete="deleteSelected" @properties="showProperties" />
     <DesktopActionDialog v-model="dialog.visible" :title="dialog.title" :message="dialog.message" :mode="dialog.mode" :initial-value="dialog.initialValue" @confirm="applyDialog" />
+    <ShortcutPickerDialog v-model="shortcutPickerVisible" @confirm="applyDesktopShortcut" />
     <div v-if="selectionBox" class="xp-selection-marquee" :style="{ left: `${selectionBox.left}px`, top: `${selectionBox.top}px`, width: `${selectionBox.width}px`, height: `${selectionBox.height}px` }"></div>
-    <Taskbar @launch="windows.open($event)" @power="requestPower" @logoff="requestLogoff" />
+    <Taskbar @launch="launchApp" @power="requestPower" @logoff="requestLogoff" />
     <audio ref="audio" :src="LoginAudio" preload="auto"></audio>
   </div>
 </template>

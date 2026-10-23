@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { getDesktopApp } from "@/apps/manifest"
+import { useDesktopStore } from "@/store/desktopStore"
 
 export type WindowState = "normal" | "minimized" | "maximized"
 
@@ -54,6 +55,7 @@ export const useWindowStore = defineStore("windows", {
     open(appId: string, initialFolderId?: string) {
       const app = getDesktopApp(appId)
       if (!app) return
+      useDesktopStore().recordRecentApp(appId)
       const targetFolderId = initialFolderId ?? app.defaultFolderId
       const existing = this.windows.find((window) => window.appId === appId)
       if (existing) {

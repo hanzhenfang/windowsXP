@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "vite --port 4399",
     "build": "run-p type-check build-only",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --threads=false",
+    "test:watch": "vitest --threads=false",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit"

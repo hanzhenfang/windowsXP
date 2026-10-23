@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 import { useWindowStore } from "@/store/windowStore"
+import { useDesktopStore } from "@/store/desktopStore"
 
 describe("per-application window layouts", () => {
   beforeEach(() => {
@@ -30,5 +31,14 @@ describe("per-application window layouts", () => {
     const reopenedId = nextSession.open("browser")!
 
     expect(nextSession.windows.find((item) => item.id === reopenedId)).toMatchObject({ x: 200, y: 100, width: 700, height: 480 })
+  })
+
+  it("recordsRecentLaunchOnceForAllWindowLaunchPaths", () => {
+    const windows = useWindowStore()
+    windows.open("browser")
+    windows.open("blog")
+    windows.open("browser")
+
+    expect(useDesktopStore().shortcuts.recentApps.slice(0, 2)).toEqual(["browser", "blog"])
   })
 })

@@ -8,16 +8,23 @@ import NetworkIcon from "@/assets/systemIcon/网络邻居.ico"
 import StartMenu from "./StartMenu.vue"
 import { useSystemStore } from "@/store/systemStore"
 import { usePreferencesStore } from "@/store/preferencesStore"
+import { useDesktopStore } from "@/store/desktopStore"
+import { desktopApps } from "@/apps/manifest"
 
 const emit = defineEmits<{ (event: "launch", appId: string): void; (event: "power"): void; (event: "logoff"): void }>()
 const windows = useWindowStore()
 const root = useRootStore()
 const system = useSystemStore()
 const preferences = usePreferencesStore()
+const desktop = useDesktopStore()
 const isStartOpen = ref(false)
 const now = ref(new Date())
 const isMobile = computed(() => root.isMobile)
 const timeText = computed(() => now.value.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))
+const recentApps = computed(() => desktop.shortcuts.recentApps.flatMap((id) => {
+  const app = desktopApps.find((candidate) => candidate.id === id)
+  return app ? [app] : []
+}))
 let clockTimer = 0
 
 onMounted(() => { clockTimer = window.setInterval(() => { now.value = new Date() }, 1000) })
@@ -47,7 +54,7 @@ function toggleTaskWindow(id: string) {
 
 <template>
   <div class="xp-taskbar" :class="[`xp-taskbar-theme-${preferences.themeColor}`, { 'xp-taskbar-mobile': isMobile }]">
-    <Transition name="start-menu"><StartMenu v-if="isStartOpen" @launch="emit('launch', $event); isStartOpen = false" @power="emit('power'); isStartOpen = false" @logoff="emit('logoff'); isStartOpen = false" /></Transition>
+    <Transition name="start-menu"><StartMenu v-if="isStartOpen" :recent-apps="recentApps" @launch="emit('launch', $event); isStartOpen = false" @power="emit('power'); isStartOpen = false" @logoff="emit('logoff'); isStartOpen = false" /></Transition>
     <button class="xp-start-button" :class="{ active: isStartOpen }" aria-label="开始" @click="isStartOpen = !isStartOpen"><img :src="WindowsLogo" /><span>开始</span></button>
     <div class="xp-task-items">
       <button v-for="item in windows.taskbarWindows" :key="item.id" :class="{ active: windows.activeWindowId === item.id && item.state !== 'minimized' }" :title="item.title" @click="toggleTaskWindow(item.id)"><img :src="item.icon" /><span>{{ item.title }}</span></button>
