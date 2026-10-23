@@ -1,56 +1,53 @@
 <script lang="ts" setup>
-import { ref, nextTick, onMounted, onBeforeUnmount } from "vue"
-
+import { onBeforeUnmount, onMounted, ref } from "vue"
 import IconGroup from "@/pages/DeskTop/IconGroup/index.vue"
 import Footer from "@/pages/DeskTop/Footer/index.vue"
-
-import { openContextMenus } from "@/components/ClickMenu/index"
-
+import AppWindow from "@/components/Window/AppWindow.vue"
+import { useWindowStore } from "@/store/windowStore"
+import { useSystemAudio } from "@/composables/useSystemAudio"
 import DeskBg from "@/assets/deskbg.jpg"
 import LoginAudio from "@/assets/audio/login.mp3"
 
-let timerID: number
+const store = useWindowStore()
 const audio = ref<HTMLAudioElement>()
-
-const { openMenu, closeMenu, isShow } = openContextMenus()
-
-function closeTheMenu() {
-  closeMenu()
+const { play } = useSystemAudio()
+const contextMenu = ref<{ x: number; y: number } | null>(null)
+function handleContextMenu(event: MouseEvent) {
+  const desktop = document.getElementById("PCDesktop")
+  if (!desktop?.contains(event.target as Node)) return
+  event.preventDefault()
+  const bounds = desktop.getBoundingClientRect()
+  contextMenu.value = { x: Math.max(0, Math.min(event.clientX - bounds.left, bounds.width - 190)), y: Math.max(0, Math.min(event.clientY - bounds.top, bounds.height - 205)) }
 }
-
+function closeContextMenu() { contextMenu.value = null }
 onMounted(() => {
-  window.addEventListener("click", closeTheMenu)
+  document.addEventListener("contextmenu", handleContextMenu)
+  document.addEventListener("click", closeContextMenu)
+  play(audio.value)
 })
-
-nextTick(() => {
-  audio.value?.play()
-})
-
 onBeforeUnmount(() => {
-  if (timerID) clearInterval(timerID)
-  window.removeEventListener("click", closeTheMenu)
+  document.removeEventListener("contextmenu", handleContextMenu)
+  document.removeEventListener("click", closeContextMenu)
 })
 </script>
-<template>
-  <div
-    id="PCDesktop"
-    class="relative w-full h-full bg-center"
-    :style="{ backgroundImage: `url(${DeskBg})`, backgroundPosition: `center` }"
-  >
-    <div class="w-full h-full flex flex-col">
-      <!-- content -->
-      <div class="w-full grow flex">
-        <div class="w-10% h-full">
-          <IconGroup />
-        </div>
-        <div class="h-full grow flex items-center justify-center">
-          <!-- <div class="text-100px text-black font-500">导航栏响应式交互</div> -->
-        </div>
-      </div>
 
-      <!-- footer left -->
-      <Footer />
+<template>
+  <div id="PCDesktop" class="xp-desktop" :style="{ backgroundImage: `url(${DeskBg})` }" @pointerdown.self="store.activeWindowId = null" @click.self="closeContextMenu">
+    <IconGroup />
+    <TransitionGroup name="xp-window-transition">
+      <AppWindow v-for="window in store.visibleWindows" :key="window.id" :window="window" :mobile="false" />
+    </TransitionGroup>
+    <div v-if="contextMenu" class="xp-context-menu" :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }" @click.stop>
+      <button @click="closeContextMenu">查看(V)　›</button>
+      <button @click="closeContextMenu">排列图标方式(O)　›</button>
+      <button @click="closeContextMenu">刷新(E)</button>
+      <hr />
+      <button disabled>粘贴(P)</button>
+      <hr />
+      <button @click="closeContextMenu">新建(W)　›</button>
+      <button @click="closeContextMenu">属性(R)</button>
     </div>
-    <audio ref="audio" :src="LoginAudio">不支持</audio>
+    <Footer />
+    <audio ref="audio" :src="LoginAudio" preload="auto"></audio>
   </div>
 </template>

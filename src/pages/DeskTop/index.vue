@@ -1,22 +1,24 @@
 <script lang="ts" setup>
-import { onMounted, shallowRef } from "vue"
+import { computed, onBeforeUnmount, onMounted } from "vue"
 import { useRootStore } from "@/store/rootStore"
 import { storeToRefs } from "pinia"
 
 import PCDeskTop from "@/pages/DeskTop/PCDeskTop/index.vue"
 import MobileDeskTop from "@/pages/DeskTop/MobileDeskTop/index.vue"
 
-import type { Component } from "vue"
 
 const rootStore = useRootStore()
 const { isMobile } = storeToRefs(rootStore)
 
-const showComponent = shallowRef<Component>()
+let stopResizeListener: (() => void) | undefined
 
 onMounted(() => {
-  showComponent.value = isMobile.value ? MobileDeskTop : PCDeskTop
+  stopResizeListener = rootStore.initStore()
 })
+
+const desktopComponent = computed(() => isMobile.value ? MobileDeskTop : PCDeskTop)
+onBeforeUnmount(() => stopResizeListener?.())
 </script>
 <template>
-  <Component :is="showComponent" />
+  <Component :is="desktopComponent" />
 </template>

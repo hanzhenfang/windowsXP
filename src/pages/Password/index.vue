@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch, CSSProperties } from "vue"
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch, CSSProperties } from "vue"
 import { useRouter } from "vue-router"
 import { storeToRefs } from "pinia"
 
@@ -21,6 +21,8 @@ const { isMobile } = storeToRefs(rootStore)
 const iconWrapper = ref<HTMLDivElement>()
 const iconWrapperOffsetWidth = ref()
 const shutDownModal = new ShutDownModalCreator()
+let loadingTimer = 0
+let startupTimer = 0
 
 const router = useRouter()
 const isLoading = ref<boolean>(true) // control before show avatar
@@ -42,8 +44,8 @@ function hdlClickAvatar() {
     isChoice.value = true
   } else {
     isLoginSuccess.value = true
-    setTimeout(() => {
-      if (isMobile) {
+    loadingTimer = window.setTimeout(() => {
+      if (isMobile.value) {
         router.push({ name: "desktop" })
       } else {
         window.open("https://juejin.cn/user/3065861918435437")
@@ -80,14 +82,7 @@ function hdlClickBackBtn() {
 }
 
 function beforeHook() {
-  const _startTime = Date.now()
-  const _timeID = window.setInterval(() => {
-    const _nowTime = Date.now()
-    if (_nowTime - _startTime > loadingDurationTime) {
-      clearInterval(_timeID)
-      isLoading.value = false
-    }
-  })
+  startupTimer = window.setTimeout(() => { isLoading.value = false }, loadingDurationTime)
 }
 
 watch(isChoice, () => {
@@ -98,6 +93,10 @@ watch(isChoice, () => {
 
 onMounted(() => {
   beforeHook()
+})
+onBeforeUnmount(() => {
+  window.clearTimeout(loadingTimer)
+  window.clearTimeout(startupTimer)
 })
 </script>
 <template>

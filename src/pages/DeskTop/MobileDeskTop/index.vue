@@ -1,29 +1,26 @@
 <script lang="ts" setup>
-import { ref, nextTick } from "vue"
-
+import { onMounted, ref } from "vue"
 import IconGroup from "@/pages/DeskTop/IconGroup/index.vue"
 import Footer from "@/pages/DeskTop/Footer/index.vue"
-
+import AppWindow from "@/components/Window/AppWindow.vue"
+import { useWindowStore } from "@/store/windowStore"
+import { useSystemAudio } from "@/composables/useSystemAudio"
 import DeskBg from "@/assets/deskbg.jpg"
 import LoginAudio from "@/assets/audio/login.mp3"
 
+const store = useWindowStore()
 const audio = ref<HTMLAudioElement>()
-
-nextTick(() => {
-  audio.value?.play()
-})
+const { play } = useSystemAudio()
+onMounted(() => play(audio.value))
 </script>
+
 <template>
-  <div
-    class="w-full h-full"
-    :style="{ backgroundImage: `url(${DeskBg})`, backgroundPosition: `center` }"
-  >
-    <div class="w-full h-full flex flex-col">
-      <div class="grow">
-        <IconGroup />
-      </div>
-      <Footer />
-    </div>
-    <audio ref="audio" :src="LoginAudio">不支持</audio>
+  <div class="xp-desktop xp-mobile-desktop" :style="{ backgroundImage: `url(${DeskBg})` }">
+    <IconGroup mobile />
+    <Transition name="xp-window-transition">
+      <AppWindow v-if="store.activeWindow && !store.activeWindow.minimized" :key="store.activeWindow.id" :window="store.activeWindow" :mobile="true" />
+    </Transition>
+    <Footer />
+    <audio ref="audio" :src="LoginAudio" preload="auto"></audio>
   </div>
 </template>

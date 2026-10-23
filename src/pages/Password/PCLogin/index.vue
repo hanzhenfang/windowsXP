@@ -74,7 +74,7 @@ function onMouseEnterAvatar() {
   isHover.value = true
 }
 
-function onMouseLeaveAvatar(e) {
+function onMouseLeaveAvatar() {
   if (isMouseDown.value) return
   isHover.value = false
 }
@@ -84,7 +84,9 @@ function onMouseUp() {
   isMouseDown.value = false
 }
 
-function onMouseDown(e: MouseEvent) {
+function onMouseDown(e: PointerEvent) {
+  if (e.pointerType === "mouse" && e.button !== 0) return
+  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
   isHover.value = true
   isMouseDown.value = true
 
@@ -92,11 +94,11 @@ function onMouseDown(e: MouseEvent) {
   avatarSwiperRect.offsetLeft = e.offsetX
 }
 
-function onMouseMove(e: MouseEvent) {
+function onMouseMove(e: PointerEvent) {
   if (!canSlide.value || !isMouseDown.value) return
   e.preventDefault()
   //tips: in some cases, user mouse may move out the avatar scope,that will cause avatarbox move error.
-  document.onmousemove = function (e) {
+  document.onpointermove = function (e) {
     e.preventDefault()
     const _MAX__OFFSET_DISTANCE =
       wrapperOffsetWidth.value - avatarBoxOffsetWidth.value - 3
@@ -112,7 +114,7 @@ function onMouseMove(e: MouseEvent) {
   }
 
   //tips: init the avatarbox position when user mouse up.
-  document.onmouseup = function () {
+  document.onpointerup = function () {
     initAvatarState()
   }
 }
@@ -122,6 +124,8 @@ function initAvatarState() {
   isHover.value = false
   canSlide.value = false
   document.onmousemove = () => {}
+  document.onpointermove = null
+  document.onpointerup = null
   if (!!avatarBox.value) avatarBox.value!.style.transform = `translateX(0px)`
 }
 
@@ -153,10 +157,11 @@ onBeforeUnmount(() => {
         :style="avatarBoxStyle"
         class="h-fit border-white rounded-1rem overflow-hidden bg-red cursor-pointer"
         @mouseenter.stop="onMouseEnterAvatar"
-        @mousedown="onMouseDown"
-        @mousemove="onMouseMove"
+        @pointerdown="onMouseDown"
+        @pointermove="onMouseMove"
         @mouseleave="onMouseLeaveAvatar"
-        @mouseup="onMouseUp"
+        @pointerup="onMouseUp"
+        @pointercancel="onMouseUp"
       >
         <img
           class="block h-9rem object-contain"

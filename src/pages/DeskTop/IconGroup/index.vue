@@ -1,12 +1,27 @@
 <script lang="ts" setup>
-import { desktopIconGroup } from "./iconGroup"
-import { openPersonalJueJin } from "@/utils/openJueJin"
+import { ref } from "vue"
+import { desktopApps } from "@/apps/manifest"
+import { useWindowStore } from "@/store/windowStore"
+
+const props = withDefaults(defineProps<{ mobile?: boolean }>(), { mobile: false })
+const store = useWindowStore()
+const selectedId = ref<string | null>(null)
+
+function activate(id: string, event: MouseEvent) {
+  selectedId.value = id
+  if (props.mobile) {
+    store.openApp(id)
+    return
+  }
+  if (event.detail >= 2) store.openApp(id)
+}
 </script>
+
 <template>
-  <div @click.stop="openPersonalJueJin" class="h-full pl-1% pt-1%">
-    <div v-for="item in desktopIconGroup" class="w-full flex flex-col mb-1rem">
-      <img class="w-5rem h-full object-contain mb-1rem" :src="item.icon" />
-      <span>{{ item.name }}</span>
-    </div>
+  <div class="desktop-icons" :class="{ 'desktop-icons-mobile': mobile }" @click.self="selectedId = null">
+    <button v-for="item in desktopApps" :key="item.id" class="desktop-icon" :class="{ selected: selectedId === item.id }" @click.stop="activate(item.id, $event)" @keydown.enter="store.openApp(item.id)">
+      <img :src="item.icon" :alt="item.title" draggable="false" />
+      <span>{{ item.id === 'browser' ? 'IE浏览器' : item.title }}</span>
+    </button>
   </div>
 </template>

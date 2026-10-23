@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted, nextTick, onBeforeMount } from "vue"
+import { ref, watch, onMounted, nextTick, onBeforeUnmount } from "vue"
 import { useRouter } from "vue-router"
 
 import IconCombination from "@/components/IconCombination/index.vue"
 
 //some options constants
 let timerID: number
+let printTimerID: number
+let loadingTimerID: number
 const welcomText: string =
   "恭喜你打开了一个非常 cool 的应用，WindowXP，这也是我偶然迸发的一个 idea ，如果你觉得有意思，不如和我一起完成这个作品吧！～" // will automatic printing when user first enter the page
 const cursorFlickerFrequency: number = 200 //control the cursor flicker frequency
@@ -40,10 +42,10 @@ function turnOnSystem() {
 function autoPrintText(text: string) {
   let _str = ""
   let _index = 0
-  const _timerID = window.setInterval(() => {
+  printTimerID = window.setInterval(() => {
     if (!textAreas.value) return
     if (_index > text.length - 1) {
-      clearInterval(_timerID)
+      clearInterval(printTimerID)
       return
     }
     _str = _str + text.substring(_index, _index + 1)
@@ -56,10 +58,10 @@ function autoPrintText(text: string) {
 function stopTheLoadingPage() {
   if (isLoading.value === false) return
   let _startLoadingTime = Date.now()
-  const _timerID = setInterval(() => {
+  loadingTimerID = window.setInterval(() => {
     const _loadingPageTime = Date.now()
     if (_loadingPageTime - _startLoadingTime > loadingDuration) {
-      clearInterval(_timerID)
+      clearInterval(loadingTimerID)
       isLoading.value = false
       router.replace({ name: "password" })
     }
@@ -76,8 +78,10 @@ nextTick(() => {
   autoPrintText(welcomText)
 })
 
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   if (!!timerID) clearInterval(timerID)
+  if (!!printTimerID) clearInterval(printTimerID)
+  if (!!loadingTimerID) clearInterval(loadingTimerID)
 })
 </script>
 <template>
