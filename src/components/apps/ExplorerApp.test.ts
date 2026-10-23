@@ -33,6 +33,16 @@ describe("local Explorer workflows", () => {
     expect(wrapper.find(".xp-explorer-status").text()).toContain("1 个对象")
   })
 
+  it("selectAllUsesVisibleSearchResults", async () => {
+    const wrapper = mountExplorer()
+    await wrapper.get('input[aria-label="搜索此文件夹及其子文件夹"]').setValue("完全在浏览器")
+    await pressOnMain(wrapper, "a", { ctrlKey: true })
+
+    expect(wrapper.findAll(".xp-file-item")).toHaveLength(1)
+    expect(wrapper.findAll(".xp-file-item.selected").map((item) => item.attributes("data-file-id"))).toEqual(["sample-readme"])
+    expect(wrapper.get(".xp-explorer-status").text()).toContain("已选择 1 个对象")
+  })
+
   it("doesNotHijackTextInputShortcuts", async () => {
     const wrapper = mountExplorer()
     await wrapper.get('[data-file-id="sample-readme"]').trigger("click")

@@ -177,7 +177,7 @@ function onExplorerKeyDown(event: KeyboardEvent) {
     return
   }
   if (event.key === "Backspace") { event.preventDefault(); goUp(); return }
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") { event.preventDefault(); selectedIds.value = entries.value.map((entry) => entry.id); return }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") { event.preventDefault(); selectedIds.value = displayEntries.value.map((entry) => entry.id); return }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && canCopySelection.value) { event.preventDefault(); copySelected(); return }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "x" && canDeleteSelection.value) { event.preventDefault(); cutSelected(); return }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v" && clipboard.value) { event.preventDefault(); pasteClipboard(); return }
