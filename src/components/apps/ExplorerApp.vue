@@ -5,9 +5,11 @@ import type { MockEntry } from "@/mocks/filesystem/types"
 import ExplorerToolbar, { type ExplorerBreadcrumb } from "./ExplorerToolbar.vue"
 import FileItem from "./FileItem.vue"
 import DesktopActionDialog from "@/components/desktop/DesktopActionDialog.vue"
+import { useWindowStore } from "@/store/windowStore"
 
 const props = defineProps<{ initialFolderId?: string }>()
 const filesystem = useFilesystemStore()
+const windows = useWindowStore()
 const currentFolderId = ref(props.initialFolderId && filesystem.entryById(props.initialFolderId) ? props.initialFolderId : "my-computer")
 const backHistory = ref<string[]>([])
 const forwardHistory = ref<string[]>([])
@@ -149,7 +151,7 @@ watch(() => props.initialFolderId, (id) => { if (id) navigateTo(id) })
     <div class="xp-explorer-body">
       <aside class="xp-explorer-sidebar">
         <section class="xp-explorer-task"><h3>文件和文件夹任务</h3><button :disabled="!selectedEntry || selectedEntry.system" @click="startRename">✏️　重命名此项目</button><button :disabled="!selectedEntry || selectedEntry.system" @click="deleteSelected">🗑️　删除此项目</button><button @click="startNewFolder">📁　新建文件夹</button></section>
-        <section class="xp-explorer-task"><h3>其他位置</h3><button @click="navigateTo('my-computer')">🖥️　我的电脑</button><button @click="navigateTo('my-documents')">📄　我的文档</button><button @click="navigateTo('desktop-folder')">🗂️　桌面</button><button @click="navigateTo('my-pictures')">🖼️　图片收藏</button><button @click="navigateTo('my-music')">🎵　我的音乐</button></section>
+        <section class="xp-explorer-task"><h3>其他位置</h3><button @click="navigateTo('my-computer')">🖥️　我的电脑</button><button @click="navigateTo('my-documents')">📄　我的文档</button><button @click="navigateTo('desktop-folder')">🗂️　桌面</button><button @click="navigateTo('my-pictures')">🖼️　图片收藏</button><button @click="navigateTo('my-music')">🎵　我的音乐</button><button @click="windows.open('recycle')">{{ filesystem.recycleBinEntries.length ? '🗑️📄' : '🗑️' }}　回收站（{{ filesystem.recycleBinEntries.length }}）</button></section>
         <section class="xp-explorer-task"><h3>详细信息</h3><p>{{ selectedEntry?.name ?? currentFolder?.name }}</p><small>{{ selectedEntry ? (selectedEntry.kind === 'folder' ? '文件夹' : selectedEntry.type) : `${entries.length} 个对象` }}</small></section>
       </aside>
       <main class="xp-explorer-main" :class="`xp-explorer-${view}`" tabindex="0">

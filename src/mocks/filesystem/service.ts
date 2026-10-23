@@ -89,12 +89,13 @@ export const filesystemService = {
     const root = findEntry(snapshot, id)
     if (!root || root.system || root.parentId === null) throw new FilesystemOperationError("此系统项目不能删除。")
     const originalParentId = root.parentId
+    const deletedAt = Date.now()
     const subtree = collectSubtree(snapshot.entries, id)
     const subtreeIds = new Set(subtree.map((entry) => entry.id))
     snapshot.entries = snapshot.entries.filter((entry) => !subtreeIds.has(entry.id))
     snapshot.recycleBin.push(...subtree.map((entry) => entry.id === id
-      ? { ...entry, recycleGroupId: id, originalParentId }
-      : { ...entry, recycleGroupId: id }))
+      ? { ...entry, recycleGroupId: id, originalParentId, deletedAt }
+      : { ...entry, recycleGroupId: id, deletedAt }))
     save(snapshot)
   },
   restore(id: string): void {
@@ -107,7 +108,7 @@ export const filesystemService = {
     const group = snapshot.recycleBin.filter((entry) => entry.recycleGroupId === id)
     snapshot.recycleBin = snapshot.recycleBin.filter((entry) => entry.recycleGroupId !== id)
     snapshot.entries.push(...group.map((entry) => {
-      const { recycleGroupId: _recycleGroupId, originalParentId: _originalParentId, ...rest } = entry
+      const { recycleGroupId: _recycleGroupId, originalParentId: _originalParentId, deletedAt: _deletedAt, ...rest } = entry
       return entry.id === id ? { ...rest, parentId: root.originalParentId! } : rest
     }))
     save(snapshot)

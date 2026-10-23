@@ -26,11 +26,12 @@ function getStorage(): StorageLike {
 function isEntry(value: unknown): value is MockEntry {
   if (!value || typeof value !== "object") return false
   const entry = value as Partial<MockEntry>
+  const hasValidDeletedAt = entry.deletedAt === undefined || (typeof entry.deletedAt === "number" && Number.isFinite(entry.deletedAt))
   return typeof entry.id === "string" && typeof entry.name === "string" &&
     (entry.parentId === null || typeof entry.parentId === "string") &&
     (entry.kind === "file" || entry.kind === "folder") && typeof entry.type === "string" &&
     typeof entry.size === "number" && Number.isFinite(entry.size) &&
-    typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt)
+    typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt) && hasValidDeletedAt
 }
 
 function isValidSnapshot(value: unknown): value is FilesystemSnapshot {

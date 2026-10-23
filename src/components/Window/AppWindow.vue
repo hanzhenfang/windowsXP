@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import { useWindowStore, type AppWindow as WindowState } from "@/store/windowStore"
-import { getDesktopApp } from "@/apps/manifest"
 import ExplorerApp from "@/components/apps/ExplorerApp.vue"
+import RecycleBinApp from "@/components/apps/RecycleBinApp.vue"
 
 const props = defineProps<{ window: WindowState; mobile: boolean }>()
 const store = useWindowStore()
@@ -10,7 +10,6 @@ const dragging = ref(false)
 const dragOrigin = ref({ x: 0, y: 0, left: 0, top: 0 })
 const resizing = ref(false)
 const resizeOrigin = ref({ x: 0, y: 0, left: 0, top: 0, width: 0, height: 0, direction: "" })
-const app = computed(() => getDesktopApp(props.window.appId))
 const style = computed(() => props.mobile
   ? { zIndex: props.window.zIndex }
   : { zIndex: props.window.zIndex, left: `${props.window.x}px`, top: `${props.window.y}px`, width: `${props.window.width}px`, height: `${props.window.height}px` })
@@ -67,16 +66,16 @@ function toggleFromTitle(event: MouseEvent) {
       </div>
     </header>
     <div v-if="window.appId !== 'computer'" class="xp-window-toolbar"><span>文件(F)</span><span>编辑(E)</span><span>查看(V)</span><span>收藏(A)</span><span>工具(T)</span><span>帮助(H)</span></div>
-    <div class="xp-window-content" :class="{ 'xp-explorer-window-content': window.appId === 'computer' }">
+    <div class="xp-window-content" :class="{ 'xp-explorer-window-content': window.appId === 'computer', 'xp-recycle-window-content': window.appId === 'recycle' }">
       <template v-if="window.appId === 'computer'">
         <ExplorerApp :initial-folder-id="window.initialFolderId" />
       </template>
-      <template v-else-if="window.appId === 'recycle'"><div class="xp-empty">🗑️<p>{{ app?.description }}</p></div></template>
+      <template v-else-if="window.appId === 'recycle'"><RecycleBinApp /></template>
       <template v-else-if="window.appId === 'network'"><h2>网络任务</h2><p>查看网络连接、设置家庭或小型办公网络。</p><div class="xp-network-card">🌐　局域网或高速 Internet</div></template>
       <template v-else-if="window.appId === 'browser'"><div class="xp-browser-placeholder"><div>🌐</div><h2>Internet Explorer</h2><p>浏览器将在本地打开模拟页面，不会连接外网。</p><button @click="store.close(window.id)">关闭窗口</button></div></template>
       <template v-else-if="window.appId === 'blog'"><div class="xp-browser-placeholder"><h2>韩振方的个人主页</h2><p>本地示例主页</p><p>文章内容将在个人博客模块中补齐。</p></div></template>
     </div>
-    <footer v-if="window.appId !== 'computer'" class="xp-window-status">对象: 0</footer>
+    <footer v-if="window.appId !== 'computer' && window.appId !== 'recycle'" class="xp-window-status">对象: 0</footer>
     <template v-if="!mobile && window.state === 'normal'">
       <div v-for="direction in ['n','s','e','w','ne','nw','se','sw']" :key="direction" class="xp-resize-handle" :class="`xp-resize-${direction}`" @pointerdown="beginResize($event, direction)" @pointermove="moveResize" @pointerup="endResize" @pointercancel="endResize"></div>
     </template>

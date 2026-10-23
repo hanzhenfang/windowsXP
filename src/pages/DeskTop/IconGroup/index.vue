@@ -3,7 +3,7 @@ import { ref } from "vue"
 import type { DesktopApp } from "@/apps/manifest"
 import type { MockEntry } from "@/mocks/filesystem/types"
 
-const props = withDefaults(defineProps<{ mobile?: boolean; apps?: DesktopApp[]; folders?: MockEntry[]; selectedIds?: string[] }>(), { mobile: false, apps: () => [], folders: () => [], selectedIds: () => [] })
+const props = withDefaults(defineProps<{ mobile?: boolean; apps?: DesktopApp[]; folders?: MockEntry[]; selectedIds?: string[]; recycleCount?: number }>(), { mobile: false, apps: () => [], folders: () => [], selectedIds: () => [], recycleCount: 0 })
 const emit = defineEmits<{
   (event: "select", id: string | null): void
   (event: "open-app", id: string): void
@@ -41,7 +41,7 @@ function focusRelative(event: KeyboardEvent, offset: number) {
 <template>
   <div class="desktop-icons" :class="{ 'desktop-icons-mobile': mobile }" @click.self="emit('select', null)">
     <button v-for="item in apps" :key="item.id" :data-icon-id="item.id" class="desktop-icon" :class="{ selected: selectedIds.includes(item.id) }" @click.stop="activateApp(item.id, $event)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: item.id, type: 'app' })">
-      <img :src="item.icon" :alt="item.title" draggable="false" />
+      <span class="desktop-icon-graphic"><img :src="item.icon" :alt="item.title" draggable="false" /><span v-if="item.id === 'recycle' && recycleCount" class="desktop-icon-recycle-full" :aria-label="`${recycleCount} 个已删除项目`">📄</span></span>
       <span>{{ item.title }}</span>
     </button>
     <button v-for="folder in folders" :key="folder.id" :data-icon-id="folder.id" class="desktop-icon" :class="{ selected: selectedIds.includes(folder.id) }" @click.stop="activateFolder(folder)" @keydown.up.prevent="focusRelative($event, -1)" @keydown.down.prevent="focusRelative($event, 1)" @keydown.left.prevent="focusRelative($event, -1)" @keydown.right.prevent="focusRelative($event, 1)" @contextmenu.stop.prevent="emit('context-icon', $event, { id: folder.id, type: 'folder' })">

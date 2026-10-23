@@ -160,16 +160,22 @@ flowchart LR
 - Create: `src/components/apps/RecycleBinApp.vue`
 - Create: `src/components/apps/ConfirmDialog.vue`
 - Modify: `src/components/apps/ExplorerApp.vue`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Modify: `src/pages/DeskTop/IconGroup/index.vue`
 - Modify: `src/apps/manifest.ts`
+- Modify: `src/mocks/filesystem/types.ts`
+- Modify: `src/mocks/filesystem/storage.ts`
+- Modify: `src/mocks/filesystem/service.ts`
 
 **Interfaces:**
 - Recycle Bin consumes the `recycleBin` collection from `useFilesystemStore`.
 - Actions: restore selected/all items, permanently delete selected, empty bin with confirmation; all state changes remain local.
 
-- [ ] Implement empty and populated XP-style Recycle Bin views.
-- [ ] Add restore/delete/empty actions and confirmation dialog.
-- [ ] Feed item counts and empty/populated icon state back into desktop/task pane.
-- [ ] Verify restored items return to their original parent and persisted state survives reload.
+- [x] Implement empty and populated XP-style Recycle Bin views.
+- [x] Add restore/delete/empty actions and confirmation dialog.
+- [x] Feed item counts and empty/populated icon state back into desktop/task pane.
+- [x] Verify restored items return to their original parent and persisted state survives reload.
 
 ## Task 6: Local Network Places and system tray
 

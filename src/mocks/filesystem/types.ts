@@ -13,6 +13,8 @@ export interface MockEntry {
   recycleGroupId?: string
   /** Original parent is retained on a recycled group root for restore. */
   originalParentId?: string | null
+  /** Timestamp when the recycle group was moved into the Recycle Bin. */
+  deletedAt?: number
 }
 
 export interface FilesystemSnapshot {
