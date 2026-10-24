@@ -9,8 +9,7 @@ import LoginFooter from "@/pages/Password/LoginFooter/index.vue"
 import IconCombination from "@/components/IconCombination/index.vue"
 
 import { useRootStore } from "@/store/rootStore"
-import { ShutDownModalCreator } from "@/components/Modal/ShutDown/index"
-import type { PowerAction } from "@/components/Modal/ShutDown/types"
+import { usePowerStore } from "@/store/powerStore"
 import { createUnlockFlow, type UnlockStatus } from "@/utils/unlockFlow.js"
 
 // some options constants
@@ -18,13 +17,12 @@ const loadingDurationTime: number = 4000 // control IconCombination duration
 //**************************************/
 
 const rootStore = useRootStore()
+const power = usePowerStore()
 const { isMobile: detectedMobile } = storeToRefs(rootStore)
+const { dialogOpen } = storeToRefs(power)
 const isMobile = computed(() => detectedMobile.value)
 const unlockFlow = createUnlockFlow()
 const unlockStatus = ref<UnlockStatus>(unlockFlow.status)
-const powerMode = ref<"standby" | "shutdown" | null>(null)
-
-const shutDownModal = new ShutDownModalCreator()
 let startupTimer = 0
 let enterTimer = 0
 let stopViewportListener: (() => void) | undefined
@@ -48,12 +46,13 @@ function selectProfile() {
 }
 
 async function enterDesktop() {
-  if (isLoading.value || shutDownModal.isShow.value || !unlockFlow.begin()) return
+  if (isLoading.value || dialogOpen.value || !unlockFlow.begin()) return
   unlockStatus.value = unlockFlow.status
   enterTimer = window.setTimeout(async () => {
     try {
       await router.replace({ name: "desktop" })
       if (router.currentRoute.value.name === "desktop") {
+        power.setStatus("running")
         unlockFlow.complete()
         unlockStatus.value = unlockFlow.status
       } else {
@@ -69,25 +68,8 @@ async function enterDesktop() {
 
 function hdlClickBackBtn() {
   if (unlockStatus.value === "entering" || unlockStatus.value === "entered") return
-  if (shutDownModal.isShow.value) {
-    shutDownModal.dismiss()
-    return
-  }
-  shutDownModal.present(handlePowerAction)
-}
-
-function handlePowerAction(action: PowerAction) {
-  shutDownModal.dismiss()
-  if (action === "restart") {
-    router.replace({ name: "loading" })
-    return
-  }
-  powerMode.value = action
-}
-
-function restartFromPowerOff() {
-  powerMode.value = null
-  router.replace({ name: "loading" })
+  if (dialogOpen.value) power.closeDialog()
+  else power.openDialog()
 }
 
 function beforeHook() {
@@ -105,7 +87,6 @@ onMounted(() => {
   beforeHook()
 })
 onBeforeUnmount(() => {
-  shutDownModal.dismiss()
   stopViewportListener?.()
   window.clearTimeout(startupTimer)
   window.clearTimeout(enterTimer)
@@ -155,7 +136,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div v-else class="xp-login-form w-full flex items-center">
-            <PCLogin :shutDownModal="shutDownModal.isShow" :disabled="unlockStatus === 'entering' || unlockStatus === 'entered'" @unlock="enterDesktop" />
+            <PCLogin :shutDownModal="dialogOpen" :disabled="unlockStatus === 'entering' || unlockStatus === 'entered'" @unlock="enterDesktop" />
           </div>
         </div>
       </div>
@@ -183,13 +164,6 @@ onBeforeUnmount(() => {
       :disabled="unlockStatus === 'entering' || unlockStatus === 'entered'"
       @clickCloseBtn="hdlClickBackBtn"
     />
-    <div v-if="powerMode" class="xp-login-power-state" :class="{ 'is-standby': powerMode === 'standby' }" role="dialog" aria-modal="true">
-      <template v-if="powerMode === 'shutdown'">
-        <h1>现在可以安全地关闭计算机</h1>
-        <button type="button" @click="restartFromPowerOff">重新启动</button>
-      </template>
-      <button v-else type="button" @click="powerMode = null">计算机正在待机<br /><small>点击此处唤醒</small></button>
-    </div>
   </div>
 </template>
 
@@ -211,10 +185,6 @@ onBeforeUnmount(() => {
 .xp-login-user :deep(.xp-password-entry) { height: 3.2rem; gap: .8rem; }
 .xp-login-user :deep(.xp-password-entry input) { border: 1px solid #9aabc6; border-radius: .3rem; box-shadow: inset 1px 1px 3px #0003; font-size: 1.4rem; }
 .xp-login-user :deep(.xp-password-entry button) { flex-basis: 3rem; border: 1px solid #d5f6d7; border-radius: .4rem; background: linear-gradient(#8de889, #169d22 52%, #087316); box-shadow: inset 1px 1px 2px #e5ffe6, 0 1px 2px #173e1c; color: white; font-size: 1.8rem; text-shadow: 0 1px 2px #145a19; }
-.xp-login-power-state { position: fixed; inset: 0; z-index: 30001; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; background: #000; color: #ddd; text-align: center; }
-.xp-login-power-state h1 { font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 400; }
-.xp-login-power-state button { padding: .9rem 1.8rem; border: 1px solid #b9c9e2; border-radius: .4rem; background: linear-gradient(#fff,#d8e7fa); color: #123a75; font-size: 1.6rem; cursor: pointer; }
-.xp-login-power-state.is-standby { background: #000; }
 .xp-login-skip { position: absolute; right: clamp(1.2rem, 3vw, 3rem); bottom: 1.5rem; padding: .6rem 1rem; border: 1px solid #b9d0f5; border-radius: .4rem; background: linear-gradient(#477fc7, #174c91); color: #fff; font: 1.25rem Tahoma, "Microsoft YaHei", sans-serif; cursor: pointer; box-shadow: 0 2px 8px #0005; }
 .xp-login-skip:hover { background: linear-gradient(#6196dc, #2462ad); }
 .xp-login-skip:focus-visible { outline: 2px solid #ffe879; outline-offset: 3px; }

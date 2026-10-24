@@ -34,7 +34,7 @@
 ## Module Map
 
 - `src/mocks/`: mock data schema, seed data, local persistence adapter, and file-operation service.
-- `src/stores/`: Pinia state for filesystem, desktop preferences, power state, and windows; stores call mock services rather than embedding file mutation logic.
+- `src/store/`: Pinia state for filesystem, desktop preferences, power state, and windows; stores call mock services rather than embedding file mutation logic. This follows the repository's existing singular directory convention.
 - `src/apps/`: application manifest, local route catalog, and app-specific view components.
 - `src/components/desktop/`: shell, icons, context menus, Start menu, taskbar, tray and desktop selection state.
 - `src/components/window/`: XP title bar, window frame, controls, resize/drag behavior and mobile full-screen frame.
@@ -66,24 +66,25 @@ flowchart LR
 - Create: `src/mocks/filesystem/seed.ts`
 - Create: `src/mocks/filesystem/storage.ts`
 - Create: `src/mocks/filesystem/service.ts`
-- Create: `src/stores/filesystemStore.ts`
+- Create: `src/store/filesystemStore.ts`
 - Modify: `src/apps/manifest.ts`
 
 **Interfaces:**
 - `MockEntry`: `{ id: string; parentId: string | null; name: string; kind: 'folder' | 'file'; type: string; size: number; modifiedAt: number; content?: string; system?: boolean }`.
 - `FilesystemSnapshot`: `{ version: 1; entries: MockEntry[]; recycleBin: MockEntry[] }`.
-- `filesystemService`: `load(): FilesystemSnapshot`, `list(parentId: string): MockEntry[]`, `createFolder(parentId: string, name: string): MockEntry`, `createFile(parentId: string, name: string, content: string): MockEntry`, `rename(id: string, name: string): void`, `moveToRecycleBin(id: string): void`, `restore(id: string): void`, `emptyRecycleBin(): void`, `read(id: string): MockEntry | undefined`.
+- `filesystemService`: `load(): FilesystemSnapshot`, `list(parentId: string): MockEntry[]`, `createFolder(parentId: string, name: string): MockEntry`, `createFile(parentId: string, name: string, content: string): MockEntry`, `rename(id: string, name: string): void`, `moveToRecycleBin(id: string): void`, `restore(id: string): void`, `permanentlyDelete(id: string): void`, `emptyRecycleBin(): void`, `read(id: string): MockEntry | undefined`.
 - `useFilesystemStore`: reactive snapshot plus actions that call `filesystemService` and refresh store state.
 - `localStorage` key: `windows-xp-mock:filesystem`; malformed/unknown versions load the seed and replace invalid persisted data.
 - Seed `我的电脑`, `C:` and `D:` mock drives, `我的文档`, `桌面`, `图片收藏`, `音乐`, and clearly marked sample TXT/JPG/MP3 entries.
 - Moving a folder to the Recycle Bin moves its full descendant subtree as one restorable unit; restoring returns the subtree to its original parent. Permanent deletion removes the subtree.
 - Names are case-insensitively unique within one parent. Reject empty names, path separators, `.` and `..`; never overwrite an existing entry.
 
-- [ ] Define the filesystem types and v1 seed tree.
-- [ ] Implement load/parse/validate/default behavior in the storage adapter.
-- [ ] Implement local create/list/read/rename/delete/restore/empty operations and same-folder name conflict rules.
-- [ ] Connect Pinia store actions to the service and expose computed folder contents/counts.
-- [ ] Run the project's type-check and production build; inspect persisted values manually in browser devtools during UI integration.
+- [x] Define the filesystem types and v1 seed tree.
+- [x] Implement load/parse/validate/default behavior in the storage adapter.
+- [x] Implement local create/list/read/rename/delete/restore/empty operations and same-folder name conflict rules.
+- [x] Connect Pinia store actions to the service and expose computed folder contents/counts.
+- [x] Run the project's type-check and production build.
+- [x] Confirm file operations survive reload in an isolated local origin during UI integration.
 
 ## Task 2: Desktop shell, icons, menus, and taskbar behavior
 
@@ -94,8 +95,10 @@ flowchart LR
 - Create: `src/components/desktop/Taskbar.vue`
 - Modify: `src/pages/DeskTop/index.vue`
 - Modify: `src/pages/DeskTop/IconGroup/index.vue`
-- Modify: `src/pages/DeskTop/Footer/index.vue`
 - Modify: `src/global.css`
+- Remove: `src/pages/DeskTop/PCDeskTop/index.vue`
+- Remove: `src/pages/DeskTop/MobileDeskTop/index.vue`
+- Remove: `src/pages/DeskTop/Footer/index.vue`
 
 **Interfaces:**
 - Shell consumes `desktopApps`, window store, preference store and power store.
@@ -105,18 +108,17 @@ flowchart LR
 - PC icons retain one-click selection/double-click open; mobile icons open on a single tap.
 - Icon context menu provides Open, Rename, Delete, Properties; desktop blank-area menu provides Arrange, Refresh, New Folder, Properties. PC supports marquee selection, arrow-key navigation, F2 rename, Delete to Recycle Bin and Ctrl+A.
 
-- [ ] Move PC/mobile route selection under one shell boundary and keep separate presentation components only where interaction differs.
-- [ ] Implement desktop selection, icon focus, double-click timing and desktop right-click menu.
-- [ ] Implement functional Start Menu launch/search against local app manifest.
-- [ ] Implement taskbar window switching/minimize behavior, clock cleanup and local tray indicators.
-- [ ] Verify all shell controls operate without external navigation and resize between 700px layouts.
+- [x] Move PC/mobile route selection under one shell boundary and keep separate presentation components only where interaction differs.
+- [x] Implement desktop selection, icon focus, double-click timing and desktop right-click menu.
+- [x] Implement functional Start Menu launch/search against local app manifest.
+- [x] Implement taskbar window switching/minimize behavior, clock cleanup and local tray indicators.
+- [x] Verify all shell controls operate without external navigation and resize between 700px layouts.
 
 ## Task 3: Window manager and XP window frame
 
 **Files:**
-- Create: `src/stores/windowStore.ts`
-- Create: `src/components/window/AppWindow.vue`
-- Create: `src/components/window/WindowControls.vue`
+- Modify: `src/store/windowStore.ts`
+- Modify: `src/components/Window/AppWindow.vue`
 - Modify: `src/components/desktop/DesktopShell.vue`
 - Modify: `src/global.css`
 
@@ -126,11 +128,11 @@ flowchart LR
 - Default one instance per app except simulated IE, which supports multiple tabs in one app window; prevent duplicate `open()` for singleton apps.
 - Mobile maps the active window to the app viewport and keeps taskbar navigation available.
 
-- [ ] Implement store transitions and one-instance-per-app policy.
-- [ ] Implement pointer-based drag and resize, clamped to viewport and taskbar bounds.
-- [ ] Implement title-bar double-click maximize/restore and XP caption buttons.
-- [ ] Connect taskbar state to minimize/restore/focus and test rapid window transitions manually.
-- [ ] Add keyboard behaviors: Escape closes menus/dialogs, Alt+F4 closes active window, and Enter activates focused desktop icon.
+- [x] Implement store transitions and one-instance-per-app policy.
+- [x] Implement pointer-based drag and resize, clamped to viewport and taskbar bounds.
+- [x] Implement title-bar double-click maximize/restore and XP caption buttons.
+- [x] Connect taskbar state to minimize/restore/focus and test rapid window transitions manually.
+- [x] Add keyboard behaviors: Escape closes menus/dialogs, Alt+F4 closes active window, and Enter activates focused desktop icon.
 
 ## Task 4: Explorer and mock file operations
 
@@ -139,18 +141,18 @@ flowchart LR
 - Create: `src/components/apps/ExplorerToolbar.vue`
 - Create: `src/components/apps/FileItem.vue`
 - Modify: `src/apps/manifest.ts`
-- Modify: `src/components/window/AppWindow.vue`
+- Modify: `src/components/Window/AppWindow.vue`
 
 **Interfaces:**
 - Explorer state: current folder ID, back/forward history, selected entry IDs, sort key/order, view (`icons` or `details`).
 - Explorer operations use `useFilesystemStore`; route breadcrumbs and double-click folder/file open are local only.
 - Context actions: Open, New Folder, Rename, Delete, Properties; files open a local preview dialog for supported TXT/image/audio samples.
 
-- [ ] Build My Computer drives and folder navigation with XP task pane and address/breadcrumb bar.
-- [ ] Add icon/details views, sorting, selection, keyboard navigation and local file preview.
-- [ ] Add create/rename/delete operations with name validation and same-folder conflict feedback.
-- [ ] Add Explorer context menu and navigation history.
-- [ ] Verify create/rename/delete results remain correct after reload.
+- [x] Build My Computer drives and folder navigation with XP task pane and address/breadcrumb bar.
+- [x] Add icon/details views, sorting, selection, keyboard navigation and local file preview.
+- [x] Add create/rename/delete operations with name validation and same-folder conflict feedback.
+- [x] Add Explorer context menu and navigation history.
+- [x] Create, rename, and delete a temporary folder in an isolated local origin; reload after each operation and confirm the persisted result.
 
 ## Task 5: Recycle Bin
 
@@ -158,34 +160,43 @@ flowchart LR
 - Create: `src/components/apps/RecycleBinApp.vue`
 - Create: `src/components/apps/ConfirmDialog.vue`
 - Modify: `src/components/apps/ExplorerApp.vue`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Modify: `src/pages/DeskTop/IconGroup/index.vue`
 - Modify: `src/apps/manifest.ts`
+- Modify: `src/mocks/filesystem/types.ts`
+- Modify: `src/mocks/filesystem/storage.ts`
+- Modify: `src/mocks/filesystem/service.ts`
 
 **Interfaces:**
 - Recycle Bin consumes the `recycleBin` collection from `useFilesystemStore`.
 - Actions: restore selected/all items, permanently delete selected, empty bin with confirmation; all state changes remain local.
 
-- [ ] Implement empty and populated XP-style Recycle Bin views.
-- [ ] Add restore/delete/empty actions and confirmation dialog.
-- [ ] Feed item counts and empty/populated icon state back into desktop/task pane.
-- [ ] Verify restored items return to their original parent and persisted state survives reload.
+- [x] Implement empty and populated XP-style Recycle Bin views.
+- [x] Add restore/delete/empty actions and confirmation dialog.
+- [x] Feed item counts and empty/populated icon state back into desktop/task pane.
+- [x] Verify restored items return to their original parent and persisted state survives reload.
 
 ## Task 6: Local Network Places and system tray
 
 **Files:**
-- Create: `src/stores/systemStore.ts`
+- Create: `src/store/systemStore.ts`
 - Create: `src/components/apps/NetworkPlacesApp.vue`
 - Create: `src/components/apps/NetworkConnectionsApp.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
 - Modify: `src/apps/manifest.ts`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Create: `src/store/systemStore.ts`
 
 **Interfaces:**
 - Local network state: connected/disconnected, connection name, mock signal, local shared-computer list.
 - Connect/disconnect toggles only local state; shares display seeded files marked shared; no discovery or socket request.
 
-- [ ] Add seeded local connection and shared-computer mock records.
-- [ ] Build Network Places/Connections screens with connect/disconnect and status actions.
-- [ ] Reflect local network state in the tray icon and Network Places list.
-- [ ] Verify with browser network panel that connection actions emit no request.
+- [x] Add seeded local connection and shared-computer mock records.
+- [x] Build Network Places/Connections screens with connect/disconnect and status actions.
+- [x] Reflect local network state in the tray icon and Network Places list.
+- [x] Inspect connection actions and source scan to confirm state changes only use local storage and no network request APIs.
 
 ## Task 7: Simulated Internet Explorer and local Blog
 
@@ -202,36 +213,43 @@ flowchart LR
 - IE state: tabs, active tab, address, back/forward history, favorites stored in preferences; search routes to local mock results.
 - Blog uses local profile summary and clearly labeled sample post content. Existing Juejin URL is shown as text only, never as a clickable outbound link.
 
-- [ ] Remove `externalUrl` launching and all `window.open` behavior from app manifest/window store.
-- [ ] Build local IE chrome (address field, back/forward, refresh, home, favorites, tabs) over local pages.
-- [ ] Build local blog profile, article list and mock article detail navigation.
-- [ ] Route unknown addresses to a local error page; confirm there are no remote requests or external browsing contexts.
+- [x] Remove `externalUrl` launching and all `window.open` behavior from app manifest/window store (completed in Task 1 under the global offline rule).
+- [x] Build local IE chrome (address field, back/forward, refresh, home, favorites, tabs) over local pages.
+- [x] Build local blog profile, article list and mock article detail navigation.
+- [x] Route unknown addresses to a local error page; confirm there are no remote requests or external browsing contexts.
 
 ## Task 8: Control Panel, appearance, and sound
 
 **Files:**
-- Create: `src/stores/preferencesStore.ts`
+- Modify: `src/store/preferencesStore.ts` (introduced in Task 7 for browser favorites)
 - Create: `src/components/apps/ControlPanelApp.vue`
 - Create: `src/components/apps/DisplayPropertiesApp.vue`
 - Create: `src/components/apps/SoundPropertiesApp.vue`
-- Modify: `src/pages/DeskTop/PCDeskTop/index.vue`
-- Modify: `src/pages/DeskTop/MobileDeskTop/index.vue`
 - Modify: `src/components/desktop/Taskbar.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
+- Modify: `src/components/Window/AppWindow.vue`
+- Modify: `src/apps/manifest.ts`
+- Modify: `src/global.css`
 
 **Interfaces:**
 - Preferences schema v1: wallpaper ID, sound enabled, sound volume (0..1), icon size and theme color.
 - Preference service saves validated values in `windows-xp-mock:preferences`.
 - System event sounds use existing local MP3 only and respect enabled/volume/autoplay restrictions.
 
-- [ ] Add versioned preferences store and local persistence.
-- [ ] Implement Control Panel categories and Display Properties wallpaper selection using existing local assets.
-- [ ] Implement sound toggle/volume with local preview sound and tray toggle.
-- [ ] Apply preference changes immediately on PC and mobile; verify after reload.
+- [x] Add versioned preferences store and local persistence.
+- [x] Implement Control Panel categories and Display Properties wallpaper selection using existing local assets.
+- [x] Implement sound toggle/volume with local preview sound and tray toggle.
+- [x] Apply preference changes immediately on PC and mobile; verify after reload.
 
 ## Task 9: Power actions and boot/login integration
 
 **Files:**
-- Create: `src/stores/powerStore.ts`
+- Create: `src/store/powerStore.ts`
+- Create: `src/components/desktop/PowerOverlay.vue`
+- Modify: `src/App.vue`
+- Modify: `src/components/desktop/StartMenu.vue`
+- Modify: `src/components/desktop/Taskbar.vue`
+- Modify: `src/components/desktop/DesktopShell.vue`
 - Modify: `src/components/Modal/ShutDown/ShutDown.vue`
 - Modify: `src/components/Modal/ShutDown/index.ts`
 - Modify: `src/pages/Password/index.vue`
@@ -242,10 +260,10 @@ flowchart LR
 - Restart/log-off return to existing local loading/password routes; sleep shows a local wake overlay; shutdown shows local power-off screen with a wake/restart action.
 - No OS shutdown API or external navigation is called.
 
-- [ ] Replace current modal side effects with typed local power actions.
-- [ ] Implement XP-style shut down choices: Stand By, Turn Off, Restart, Cancel; mobile uses touch-friendly dialog.
-- [ ] Connect taskbar Start Menu power commands and route transitions.
-- [ ] Verify cancel, sleep/wake, logoff, restart and shutdown/wake all remain in the app.
+- [x] Replace current modal side effects with typed local power actions.
+- [x] Implement XP-style shut down choices: Stand By, Turn Off, Restart, Cancel; mobile uses touch-friendly dialog.
+- [x] Connect taskbar Start Menu power commands and route transitions.
+- [x] Verify cancel, sleep/wake, logoff, restart and shutdown/wake all remain in the app.
 
 ## Task 10: Integration and offline review
 
@@ -253,11 +271,11 @@ flowchart LR
 - Modify affected modules from Tasks 1-9.
 - Modify: `ARCHITECTURE.md`
 
-- [ ] Walk the complete boot -> login -> desktop -> Explorer -> file mutation -> Recycle Bin -> restore -> settings -> restart flow on PC and mobile.
-- [ ] Run `./node_modules/.bin/vue-tsc --noEmit` and `./node_modules/.bin/vite build`.
-- [ ] Search source for `fetch`, `XMLHttpRequest`, `WebSocket`, `window.open`, remote iframe and external navigation; remove any app-path occurrence.
-- [ ] Inspect desktop at narrow phone width, tablet width and desktop width; confirm title bars, menus, controls and taskbar remain operable.
-- [ ] Confirm persisted filesystem/preferences tolerate invalid storage and version mismatch.
+- [x] Walk the boot/login/desktop, Explorer file operations, Recycle Bin restore, settings, and restart flows across phone, tablet, and desktop layouts.
+- [x] Run `./node_modules/.bin/vue-tsc --noEmit` and `./node_modules/.bin/vite build` after the final IE persistence change.
+- [x] Search source for outbound request and browsing APIs; no app-path occurrence remains.
+- [x] Inspect narrow phone, tablet, and desktop layouts; confirm application controls and taskbar remain operable.
+- [x] Confirm local stores validate stored data and fall back for malformed or unsupported versions; IE tabs/history also restore from preferences.
 
 ## Approaches Considered
 
@@ -265,4 +283,4 @@ flowchart LR
 - **Central mock service plus Pinia stores and versioned `localStorage` (recommended default):** realistic shared file operations and settings with reload persistence, no backend or external requests; adds a small service/schema layer that must be kept consistent.
 - **In-memory Pinia-only data:** simplest state flow but all file/settings work disappears on reload, which weakens the desktop simulation.
 
-The user's stated local-only constraint selects the central mock-service approach. Since persistence preference was not returned, this plan defaults to `localStorage`; the choice can be changed before implementation.
+The user's stated local-only constraint selects the central mock-service approach. The user chose `localStorage` so mock state persists across reloads.

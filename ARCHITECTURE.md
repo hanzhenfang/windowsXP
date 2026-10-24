@@ -1,52 +1,75 @@
-# Windows XP 网页系统架构与设计方案
+# Windows XP 本地模拟桌面：架构与实现
 
-## 目标
-保留现有 XP 登录启动体验与视觉素材，补齐桌面端/移动端共用的系统外壳、可打开应用窗口、触控适配和可维护的资源能力层。桌面端以经典 XP 桌面为主，移动端以单列启动器和全屏应用页为主；两端共享应用定义、窗口状态、任务栏时钟、音频入口和图标操作。
+## 产品范围
 
-## 现有源码结论
-- Vue 3 + TypeScript + Vite + Pinia + Vue Router + UnoCSS，无测试框架/动画或音频运行时依赖。
-- 页面流程：启动 Loading -> Password -> Desktop；桌面分 PC/Mobile 两份组件。
-- 已有 XP 壁纸、系统图标、头像、登录 mp3；图标数据仅含静态名称/图片，组件点击把整个桌面图标组都导向掘金。
-- 缺少应用窗口和焦点管理，右键菜单用全局 `window.oncontextmenu` 并手工 render，设备判断只在启动时执行。
-- 计时器未系统化清理，登录解锁仅 PC 鼠标拖拽，音频在挂载后立即 play 易受浏览器策略拦截。
+在浏览器中模拟 Windows XP 风格的 PC 与移动端桌面。保留现有 Loading、Password 登录入口和本地 XP 素材，提供桌面图标、开始菜单、任务栏、可交互窗口、文件管理、回收站、模拟网络、IE/博客、控制面板和本地电源操作。
 
-## 建议架构
-1. `src/app`：系统级配置与响应式运行时（断点/输入能力/音频能力）。
-2. `src/features/desktop`：桌面外壳、图标、开始菜单、任务栏、桌面上下文菜单。
-3. `src/features/window-manager`：Pinia 管理窗口实例、最前窗口、最小化/最大化/关闭及窗口位置尺寸。
-4. `src/features/apps`：应用 manifest 与各应用 Vue 页面；图标与开始菜单从 manifest 生成，不在组件里写死。
-5. `src/shared`：XP 样式 token、可访问的 Transition、音频 composable、时间/输入工具。
-6. 保留 `src/pages/Loading` 与 `src/pages/Password` 作为启动流程；完成后统一进入桌面 Shell。
+文件、设置、收藏夹、网络连接状态和网页内容均为本地 mock。模拟系统不访问真实网站，不使用后端，不发起网络请求。新增能力使用项目现有的 Vue 3、TypeScript、Pinia、Vue Router、CSS 和原生 Audio；没有增加第三方运行依赖。
 
-## 交互设计
-- PC：桌面图标单击选中、双击打开；右键桌面/图标提供上下文菜单；开始菜单展示应用；窗口可聚焦、拖动标题栏、最小化/最大化/关闭；任务栏显示打开窗口与时钟。
-- Mobile：桌面图标使用卡片/网格，点击即打开；应用窗口以全屏页呈现，顶部保留返回/标题/关闭控制；触控拖动解锁；菜单与任务栏使用更大触控目标。
-- 动效：启动、登录、窗口开合/最小化/最大化统一 CSS + Vue Transition，尊重 `prefers-reduced-motion`。
-- 音频：原生 HTMLAudioElement 封装，默认不阻塞、不强制自动播放；用户首次交互后允许播放，静音/音量可在设置应用扩展。
+## 系统结构
 
-## 依赖策略
-- 当前不安装动画/音频依赖。CSS 动效与原生 Audio 对当前需求够用、体积更小，减少浏览器策略和维护成本。
-- 若出现复杂补间/拖拽弹簧，再引入 `motion`；若需要播放列表、音效并发、淡入淡出或音频 sprite，再引入 `howler`。
-- 可选后续依赖：`@vueuse/core`（跨组件设备/事件/生命周期工具积累后再加）。
+```mermaid
+flowchart TD
+  Router[Loading → Password → Desktop] --> Shell[DesktopShell]
+  Shell --> Icons[桌面图标与上下文菜单]
+  Shell --> WM[Window Store]
+  Shell --> Start[开始菜单与任务栏]
+  Start --> Power[Power Store / PowerOverlay]
+  WM --> Apps[本地应用]
+  Apps --> Explorer[我的电脑 / 文件资源管理器]
+  Explorer --> FSStore[Filesystem Store]
+  FSStore --> FS[本地文件服务]
+  FS --> LocalStorage[(localStorage)]
+  Apps --> Bin[回收站]
+  Bin --> FSStore
+  Apps --> Network[网络邻居 / 网络连接]
+  Network --> SystemStore[System Store]
+  SystemStore --> LocalStorage
+  Apps --> IE[本地 IE / 博客示例页]
+  IE --> Preferences[Preferences Store]
+  Apps --> Settings[控制面板 / 显示 / 声音]
+  Settings --> Preferences
+  Preferences --> LocalStorage
+```
 
-## 首轮已完成范围
-1. 修复桌面图标独立动作并按配置渲染。
-2. 建立窗口管理 store 与 XP 风格窗口组件，首批打开“我的电脑/回收站/网络邻居/IE浏览器”信息窗口。
-3. 把窗口工作区和已打开窗口任务项接入 PC 与 Mobile 桌面；移动端点击打开，全屏显示。
-4. 增加开始菜单和时钟清理，修复右键菜单全局监听与 PC 解锁改用 Pointer Events，便于触控。
-5. 修复桌面按窗口尺寸响应、音频安全播放与组件卸载清理。
+Pinia store 放在现有项目约定的 `src/store/`；mock 数据与操作在 `src/mocks/`；manifest 和应用视图在 `src/apps/`、`src/components/apps/`；桌面、窗口、电源层分别位于 `src/components/desktop/`、`src/components/Window/` 和同一桌面目录。
 
-## 实施阶段
-A. 基础：响应式系统 store、应用 manifest、窗口状态与音频/时间能力。
-B. 桌面：PC/Mobile Shell、开始菜单、任务栏、图标打开、窗口交互。
-C. 登录与菜单：Pointer 拖动、生命周期清理、菜单事件边界。
-D. 质量：运行类型检查与生产构建；按结果修复。
+## 模块与状态
 
+- **桌面与窗口**：PC 桌面图标单击选中、双击打开；移动端单击打开。PC 窗口可聚焦、拖动、缩放、最小化、最大化和关闭；移动端将活动应用铺满工作区。任务栏提供窗口切换、时钟和系统托盘。
+- **文件系统**：`windows-xp-mock:filesystem` 保存版本化文件树和回收站快照。服务负责创建、重命名、删除、还原、永久删除与同目录重名校验。回收站保留删除前的父目录信息。
+- **桌面快捷方式**：`windows-xp-mock:desktop-shortcuts` 保存本地快捷方式名称和隐藏状态。
+- **偏好设置**：`windows-xp-mock:preferences` 保存 IE 收藏、最多 12 个标签页及其活动页/导航历史、壁纸、系统音效开关与音量、图标大小和颜色方案；旧 v1 快照读取时会给新增字段补安全默认值。显示和声音更改立即作用于桌面。
+- **网络状态**：`windows-xp-mock:system` 只保存本地连接开关；共享计算机和共享文件是预置 mock 数据，不做扫描或连接。
+- **电源状态**：`Power Store` 管理当前会话的待机、模拟关机、重启和注销。电源状态不写入本地持久化；刷新会重新进入正常启动流程。
+- **IE 与博客**：`src/mocks/browser/pages.ts` 只解析 `about:home`、`windows-xp.local`、`blog.local`、本地文章和本地搜索。标签页、活动标签与前进/后退历史写入偏好设置，重开应用或刷新后恢复。未知地址显示本地错误页。Juejin 主页地址仅以文本展示。
+- **声音与外观**：壁纸及登录提示音均来自 `src/assets/`。原生 `<audio>` 捕获浏览器自动播放拒绝；静音与音量只影响本地音频。
 
-## 本地 Mock 系统边界
+localStorage 无效、版本不兼容或字段损坏时，各适配器回退到有效的种子数据/默认偏好。窗口位置、焦点和打开状态只在当前会话内存在。
 
-- Explorer 文件/文件夹、回收站、壁纸、声音与系统设置由本地 mock 数据驱动；文件变更和用户偏好写入带版本号的 localStorage。
-- IE、博客、网络邻居和网络连接均为本地模拟页面或状态；输入地址只解析本地 mock 路由，不发起 HTTP、XHR、WebSocket、iframe 或外链导航。
-- 窗口焦点、位置、大小和打开状态只在当前会话保存，刷新后回到默认桌面布局。
-- 应用通过 manifest 声明入口；窗口管理器不直接打开外部 URL。
-- 详细模块接口、文件清单、实施顺序与验收条件见 `docs/superpowers/plans/2026-10-24-local-mock-xp-desktop.md`。
+## 路由和电源流程
+
+```mermaid
+stateDiagram-v2
+  [*] --> Loading
+  Loading --> Password: 完成本地启动动画
+  Password --> Desktop: 本地登录/解锁
+  Desktop --> Sleeping: 待机
+  Sleeping --> Desktop: 唤醒
+  Desktop --> ShuttingDown: 关闭计算机
+  ShuttingDown --> Desktop: 重新唤醒
+  Desktop --> Loading: 重新启动
+  Desktop --> Password: 注销
+```
+
+PowerOverlay 挂载在应用根部，所以关机对话框、待机遮罩和断电页面可从桌面与登录页调用。关机只显示本地模拟状态，不调用操作系统接口。
+
+## 设计与可访问性
+
+XP 蓝色主题为默认值，提供橄榄绿和银色方案；桌面背景和大小图标在 PC 与手机屏幕间共享设置。控件使用原生按钮、标签和表单输入，移动电源菜单提供触控大小的操作区域。动效使用 CSS/Vue transition，不新增动画库；音频遵循浏览器自动播放限制。
+
+## 验证方式
+
+每个主要模块完成时分别运行 `vue-tsc --noEmit`、`vite build` 和 `git diff --check`，并按模块提交。浏览器预览用于核对文件操作、刷新持久化、各应用入口、电源路径和 PC/移动布局。项目不增加自动化测试框架，也不在未要求时运行测试。
+
+模块验收与实施顺序见 [本地 mock 桌面实施计划](docs/superpowers/plans/2026-10-24-local-mock-xp-desktop.md)。

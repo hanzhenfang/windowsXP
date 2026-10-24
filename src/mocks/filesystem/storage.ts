@@ -1,0 +1,109 @@
+import { createSeedFilesystem } from "./seed"
+import type { FilesystemSnapshot, MockEntry } from "./types"
+
+export const FILESYSTEM_STORAGE_KEY = "windows-xp-mock:filesystem"
+
+interface StorageLike {
+  getItem(key: string): string | null
+  setItem(key: string, value: string): void
+}
+
+let memoryValue: string | null = null
+const memoryStorage: StorageLike = {
+  getItem: () => memoryValue,
+  setItem: (_key, value) => { memoryValue = value },
+}
+
+function getStorage(): StorageLike {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) return window.localStorage
+  } catch {
+    // Storage can be unavailable in private browsing or sandboxed documents.
+  }
+  return memoryStorage
+}
+
+function isEntry(value: unknown): value is MockEntry {
+  if (!value || typeof value !== "object") return false
+  const entry = value as Partial<MockEntry>
+  const hasValidDeletedAt = entry.deletedAt === undefined || (typeof entry.deletedAt === "number" && Number.isFinite(entry.deletedAt))
+  const hasValidRecycleGroup = entry.recycleGroupId === undefined || typeof entry.recycleGroupId === "string"
+  const hasValidOriginalParent = entry.originalParentId === undefined || entry.originalParentId === null || typeof entry.originalParentId === "string"
+  return typeof entry.id === "string" && typeof entry.name === "string" &&
+    (entry.parentId === null || typeof entry.parentId === "string") &&
+    (entry.kind === "file" || entry.kind === "folder") && typeof entry.type === "string" &&
+    typeof entry.size === "number" && Number.isFinite(entry.size) &&
+    typeof entry.modifiedAt === "number" && Number.isFinite(entry.modifiedAt) && hasValidDeletedAt && hasValidRecycleGroup && hasValidOriginalParent
+}
+
+export function validateFilesystemSnapshot(value: unknown): value is FilesystemSnapshot {
+  if (!value || typeof value !== "object") return false
+  const snapshot = value as Partial<FilesystemSnapshot>
+  if (snapshot.version !== 1 || !Array.isArray(snapshot.entries) || !Array.isArray(snapshot.recycleBin)) return false
+  const all = [...snapshot.entries, ...snapshot.recycleBin]
+  if (!all.every(isEntry)) return false
+  const ids = new Set(all.map((entry) => entry.id))
+  if (ids.size !== all.length) return false
+  const entriesById = new Map(all.map((entry) => [entry.id, entry]))
+  const treeValid = all.every((entry) => {
+    if (entry.parentId === null) return true
+    const parent = entriesById.get(entry.parentId)
+    if (!parent || parent.kind !== "folder") return false
+    const seen = new Set<string>([entry.id])
+    let current: MockEntry | undefined = parent
+    while (current) {
+      if (seen.has(current.id)) return false
+      seen.add(current.id)
+      current = current.parentId ? entriesById.get(current.parentId) : undefined
+    }
+    return true
+  })
+  if (!treeValid) return false
+
+  const groups = new Map<string, MockEntry[]>()
+  for (const entry of snapshot.recycleBin) {
+    if (entry.deletedAt === undefined || !entry.recycleGroupId) return false
+    const group = groups.get(entry.recycleGroupId) ?? []
+    group.push(entry)
+    groups.set(entry.recycleGroupId, group)
+  }
+  for (const [groupId, members] of groups) {
+    const root = members.find((entry) => entry.id === groupId)
+    if (!root || root.recycleGroupId !== root.id || root.deletedAt === undefined || !root.originalParentId || root.parentId !== root.originalParentId) return false
+    if (members.some((entry) => entry.id !== root.id && entriesById.get(entry.parentId ?? "")?.recycleGroupId !== groupId)) return false
+  }
+  return true
+}
+
+function persist(snapshot: FilesystemSnapshot) {
+  try {
+    getStorage().setItem(FILESYSTEM_STORAGE_KEY, JSON.stringify(snapshot))
+  } catch {
+    // Keep the app usable if storage is full or browser policy blocks writes.
+  }
+}
+
+export function loadFilesystemSnapshot(): FilesystemSnapshot {
+  const storage = getStorage()
+  try {
+    const raw = storage.getItem(FILESYSTEM_STORAGE_KEY)
+    if (raw) {
+      const parsed: unknown = JSON.parse(raw)
+      if (validateFilesystemSnapshot(parsed)) return parsed
+    }
+  } catch {
+    // Corrupt JSON falls back to a clean local seed.
+  }
+  const seed = createSeedFilesystem()
+  persist(seed)
+  return seed
+}
+
+export function saveFilesystemSnapshot(snapshot: FilesystemSnapshot): FilesystemSnapshot {
+  persist(snapshot)
+  return snapshot
+}
+
+export function copyFilesystemSnapshot(snapshot: FilesystemSnapshot): FilesystemSnapshot {
+  return JSON.parse(JSON.stringify(snapshot)) as FilesystemSnapshot
+}

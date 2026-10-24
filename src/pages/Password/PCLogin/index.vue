@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { computed, ref, type Ref } from "vue"
+import { computed, ref } from "vue"
 
 const props = defineProps<{
-  shutDownModal: Ref<boolean>
+  shutDownModal: boolean
   disabled?: boolean
 }>()
 const emit = defineEmits<{ (event: "unlock"): void }>()
 const password = ref("")
 const errorMessage = ref("")
-const isDisabled = computed(() => props.disabled || props.shutDownModal.value)
+const isDisabled = computed(() => props.disabled || props.shutDownModal)
 
 function submitLogin() {
   if (isDisabled.value) return
