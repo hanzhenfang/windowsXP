@@ -1,16 +1,15 @@
 import { defineStore } from "pinia"
 
-import { isMobile as detectMobile } from "@/utils/isMobile"
-
 interface RootState {
   isMobile: boolean
 }
 
 export const useRootStore = defineStore("root", {
-  state: (): RootState => ({ isMobile: typeof window === "undefined" ? false : detectMobile() }),
+  state: (): RootState => ({ isMobile: typeof window === "undefined" ? false : window.innerWidth <= 768 }),
   actions: {
     initStore() {
-      const update = () => { this.isMobile = detectMobile() || window.matchMedia("(max-width: 700px)").matches }
+      // Keep the experience tied to the available viewport, not a stale UA guess.
+      const update = () => { this.isMobile = window.innerWidth <= 768 }
       update()
       window.addEventListener("resize", update, { passive: true })
       return () => window.removeEventListener("resize", update)

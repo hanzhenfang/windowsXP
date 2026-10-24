@@ -5,7 +5,7 @@ import { useRootStore } from "@/store/rootStore"
 import { storeToRefs } from "pinia"
 
 const props = withDefaults(
-  defineProps<{ companySize: number; winSize: number }>(),
+  defineProps<{ companySize?: number; winSize?: number; compact?: boolean }>(),
   {
     companySize: 3,
     winSize: 7, //then main property of this component
@@ -24,26 +24,26 @@ const iconBoxWidth = computed(() => {
 })
 
 const winStyle = computed<CSSProperties>(() => {
-  const _fontSize = isMobile.value ? props.winSize : 10
+  const _fontSize = props.winSize
   return {
-    fontSize: _fontSize + "rem",
-    lineHeight: `${_fontSize * 0.7}rem`,
+    fontSize: `clamp(${isMobile.value ? 2.2 : 3.5}rem, ${isMobile.value ? 12 : 6}vw, ${_fontSize}rem)`,
+    lineHeight: `0.72`,
   }
 })
 
 const companyStyle = computed<CSSProperties>(() => {
-  const _fontSize = isMobile.value ? props.companySize : 5
+  const _fontSize = props.companySize
   return {
-    fontSize: _fontSize + "rem",
+    fontSize: `clamp(${isMobile.value ? 1.2 : 1.6}rem, ${isMobile.value ? 4.8 : 2.6}vw, ${_fontSize}rem)`,
   }
 })
 
 const xpStyle = computed<CSSProperties>(() => {
-  const _fontSize = isMobile.value ? props.winSize : 10
+  const _fontSize = props.winSize
   return {
     position: "absolute",
-    fontSize: _fontSize / 2 + "rem",
-    bottom: _fontSize / 4 + "rem",
+    fontSize: `clamp(${isMobile.value ? 1.2 : 1.8}rem, ${isMobile.value ? 5 : 3}vw, ${_fontSize / 2}rem)`,
+    bottom: `clamp(.2rem, 1vw, ${_fontSize / 4}rem)`,
     color: "red",
     fontWeight: 800,
   }
@@ -51,12 +51,11 @@ const xpStyle = computed<CSSProperties>(() => {
 </script>
 <template>
   <div
-    class="w-full basis-45% flex flex-col items-center"
-    :style="{ paddingRight: `${parseInt(xpStyle.fontSize as string) + 1}rem` }"
+    class="xp-logo w-full flex flex-col items-center"
+    :class="{ 'xp-logo-compact': compact }"
   >
     <div
-      class="flex h-full justify-center"
-      :style="{ width: `${iconBoxWidth}px` }"
+      class="xp-logo-icon flex h-full justify-center"
     >
       <div class="self-end basis-40%">
         <span ref="companySpan" :style="companyStyle"> Microsoft </span>
@@ -75,3 +74,20 @@ const xpStyle = computed<CSSProperties>(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.xp-logo { min-width: 0; max-width: 100%; }
+.xp-logo-icon { width: min(100%, 48rem); min-height: 0; }
+.xp-logo-compact .xp-logo-icon { width: 100%; height: clamp(6rem, 16vh, 11rem); }
+.xp-logo-compact .xp-logo-icon img { width: auto; max-width: 100%; max-height: 100%; }
+.xp-logo-icon > div { min-width: 0; }
+.xp-logo-icon img { max-height: min(30vh, 32rem); }
+.xp-logo > div:last-child { position: relative; max-width: 100%; white-space: nowrap; }
+.xp-logo > div:last-child > span:first-child { display: block; line-height: .78; }
+.xp-logo > div:last-child > span:last-child { left: calc(100% - .2rem); right: auto; }
+@media (max-width: 760px), (max-height: 520px) {
+  .xp-logo-icon { width: min(72vw, 30rem); height: min(22vh, 20rem); }
+  .xp-logo-icon img { max-height: 100%; }
+  .xp-logo > div:last-child > span:first-child { line-height: .8; }
+}
+</style>

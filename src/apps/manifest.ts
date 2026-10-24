@@ -3,13 +3,14 @@ import RecycleIcon from "@/assets/systemIcon/回收站.ico"
 import NetworkIcon from "@/assets/systemIcon/网络邻居.ico"
 import IeIcon from "@/assets/systemIcon/IE浏览器.ico"
 import BlogIcon from "@/assets/systemIcon/博客.ico"
+import WindowsIcon from "@/assets/WindowsXP.ico"
 
 export interface DesktopApp {
   id: string
   title: string
   icon: string
   description: string
-  kind: "computer" | "recycle" | "network" | "browser" | "blog"
+  kind: "computer" | "recycle" | "network" | "browser" | "blog" | "settings"
   externalUrl?: string
 }
 
@@ -19,6 +20,7 @@ export const desktopApps: DesktopApp[] = [
   { id: "network", title: "网络邻居", icon: NetworkIcon, description: "查看网络连接与共享资源。", kind: "network" },
   { id: "browser", title: "Internet Explorer", icon: IeIcon, description: "打开我的掘金主页。", kind: "browser", externalUrl: "https://juejin.cn/user/3065861918435437" },
   { id: "blog", title: "个人博客", icon: BlogIcon, description: "访问我的掘金主页。", kind: "blog", externalUrl: "https://juejin.cn/user/3065861918435437" },
+  { id: "settings", title: "控制面板", icon: WindowsIcon, description: "更改桌面背景和演示偏好。", kind: "settings" },
 ]
 
 export function getDesktopApp(id: string) {

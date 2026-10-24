@@ -1,184 +1,69 @@
 <script lang="ts" setup>
-import {
-  ref,
-  reactive,
-  computed,
-  watch,
-  nextTick,
-  onBeforeUnmount,
-  CSSProperties,
-  Ref,
-} from "vue"
-import { useRouter } from "vue-router"
-
-import { sleep } from "@/utils/sleep"
+import { computed, ref, type Ref } from "vue"
 
 const props = defineProps<{
   shutDownModal: Ref<boolean>
+  disabled?: boolean
 }>()
+const emit = defineEmits<{ (event: "unlock"): void }>()
+const password = ref("")
+const errorMessage = ref("")
+const isDisabled = computed(() => props.disabled || props.shutDownModal.value)
 
-const router = useRouter()
-
-const wrapper = ref<HTMLDivElement>()
-const avatarBox = ref<HTMLDivElement>()
-
-const isHover = ref<boolean>(false)
-const isMouseDown = ref<boolean>(false) // check user mouse is downing.
-const isUnlockSuccess = ref<boolean>(false)
-
-const canSlide = ref<boolean>(false)
-const avatarBoxOffsetHeight = ref<number>(92)
-const avatarBoxOffsetWidth = ref<number>(0)
-const wrapperOffsetWidth = ref<number>(0)
-const avatarSwiperRect = reactive({
-  startClientX: 0,
-  offsetLeft: 0, // key point: the distance between wrapper'left and StartClientX
-})
-
-const wrapperStyle = computed<CSSProperties>(() => {
-  return {
-    height: isHover.value ? `9.5rem` : `12rem`,
-    width: isHover.value ? `70%` : `80%`,
-    padding: isHover.value ? `0` : `1rem`,
-    display: `flex`,
-    alignItems: `center`,
-    boxShadow: isHover.value
-      ? `1px 1px 5px 1px #4b5cc4`
-      : `0px 1px 8px 1px rgba(255,255,255,0.2)`,
-    transition: `all 1s `,
-    border: `2px solid #44cef6`,
-    borderRadius: `1rem`,
-  }
-})
-
-const avatarBoxStyle = computed<CSSProperties>(() => {
-  return {
-    height: `fit-content`,
-    border: isHover.value ? `1px solid black` : `0.5px solid white`,
-    borderRadius: `1rem`,
-    boxShadow: isHover.value ? `` : `1px 1px 10px 2px black`,
-    transition: `all 1s,`,
-    overflow: `hidden`,
-  }
-})
-
-//tips: ready to slide, collect current coordinate info.
-function collectSlideData() {
-  avatarBoxOffsetWidth.value = avatarBox.value?.offsetWidth ?? 0 //99
-  wrapperOffsetWidth.value = wrapper.value?.offsetWidth ?? 0 //405
-}
-
-function onMouseEnterAvatar() {
-  if (props.shutDownModal.value) return
-  if (isUnlockSuccess.value) return
-  isHover.value = true
-}
-
-function onMouseLeaveAvatar() {
-  if (isMouseDown.value) return
-  isHover.value = false
-}
-
-function onMouseUp() {
-  isHover.value = false
-  isMouseDown.value = false
-}
-
-function onMouseDown(e: PointerEvent) {
-  if (e.pointerType === "mouse" && e.button !== 0) return
-  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-  isHover.value = true
-  isMouseDown.value = true
-
-  avatarSwiperRect.startClientX = e.clientX
-  avatarSwiperRect.offsetLeft = e.offsetX
-}
-
-function onMouseMove(e: PointerEvent) {
-  if (!canSlide.value || !isMouseDown.value) return
-  e.preventDefault()
-  //tips: in some cases, user mouse may move out the avatar scope,that will cause avatarbox move error.
-  document.onpointermove = function (e) {
-    e.preventDefault()
-    const _MAX__OFFSET_DISTANCE =
-      wrapperOffsetWidth.value - avatarBoxOffsetWidth.value - 3
-    const { clientX } = e
-    let _offset_X = clientX - avatarSwiperRect.startClientX
-    if (_offset_X < 0) return
-    if (_offset_X > _MAX__OFFSET_DISTANCE) _offset_X = _MAX__OFFSET_DISTANCE
-    avatarBox.value!.style.transform = `translateX(${_offset_X}px)`
-    if (_offset_X === _MAX__OFFSET_DISTANCE) {
-      isUnlockSuccess.value = true
-      router.push({ name: "desktop" })
-    }
-  }
-
-  //tips: init the avatarbox position when user mouse up.
-  document.onpointerup = function () {
-    initAvatarState()
-  }
-}
-
-function initAvatarState() {
-  isMouseDown.value = false
-  isHover.value = false
-  canSlide.value = false
-  document.onmousemove = () => {}
-  document.onpointermove = null
-  document.onpointerup = null
-  if (!!avatarBox.value) avatarBox.value!.style.transform = `translateX(0px)`
-}
-
-watch(isHover, async (newValue, oldValue) => {
-  if (!newValue || !isHover.value) {
-    // if mouse leave the avator box, init the position.
-    initAvatarState()
+function submitLogin() {
+  if (isDisabled.value) return
+  if (!password.value.trim()) {
+    errorMessage.value = "请输入密码后再登录。演示环境不会验证密码内容。"
     return
-  } // if mouse move out,noting to do
-  await sleep(1000)
-  if (!isHover.value) return
-  collectSlideData()
-  canSlide.value = true
-})
-
-nextTick(() => {
-  avatarBoxOffsetHeight.value = avatarBox.value!.offsetHeight
-})
-
-onBeforeUnmount(() => {
-  initAvatarState()
-})
+  }
+  errorMessage.value = ""
+  emit("unlock")
+}
 </script>
-<template>
-  <div class="w-full h-full flex items-center">
-    <div ref="wrapper" :style="wrapperStyle">
-      <div
-        ref="avatarBox"
-        :style="avatarBoxStyle"
-        class="h-fit border-white rounded-1rem overflow-hidden bg-red cursor-pointer"
-        @mouseenter.stop="onMouseEnterAvatar"
-        @pointerdown="onMouseDown"
-        @pointermove="onMouseMove"
-        @mouseleave="onMouseLeaveAvatar"
-        @pointerup="onMouseUp"
-        @pointercancel="onMouseUp"
-      >
-        <img
-          class="block h-9rem object-contain"
-          src="@/assets/avatar.jpg"
-          draggable="false"
-        />
-      </div>
 
-      <div
-        class="ml-4rem skew-x--20"
-        :style="[
-          isHover ? { opacity: 0 } : { opacity: 1 },
-          { transition: `all 1s` },
-        ]"
-      >
-        <span class="text-3rem font-600">向右拖拽解锁屏幕</span>
+<template>
+  <form class="xp-account-login" @submit.prevent="submitLogin">
+    <img class="xp-account-avatar" src="@/assets/avatar.jpg" alt="" />
+    <div class="xp-account-details">
+      <div class="xp-account-name">韩振方</div>
+      <label class="xp-password-label" for="xp-password">键入密码</label>
+      <div class="xp-password-entry">
+        <input
+          id="xp-password"
+          v-model="password"
+          type="password"
+          autocomplete="current-password"
+          aria-label="密码"
+          :aria-invalid="Boolean(errorMessage)"
+          @input="errorMessage = ''"
+          :disabled="isDisabled"
+        />
+        <button type="submit" aria-label="登录" :disabled="isDisabled">➜</button>
       </div>
+      <p v-if="errorMessage" class="xp-login-error" role="alert">{{ errorMessage }}</p>
     </div>
-  </div>
+  </form>
 </template>
+
+<style scoped>
+.xp-account-login { width: min(100%, 39rem); display: flex; align-items: center; gap: clamp(1.2rem, 2vw, 2.4rem); padding: 1.2rem; color: #fff; }
+.xp-account-avatar { flex: 0 0 clamp(7rem, 9vw, 10rem); width: clamp(7rem, 9vw, 10rem); height: clamp(7rem, 9vw, 10rem); object-fit: cover; border: 2px solid #fff; border-radius: .7rem; box-shadow: 2px 3px 8px #132c5877; }
+.xp-account-details { flex: 1; min-width: 0; }
+.xp-account-name { margin-bottom: .8rem; font-size: clamp(1.8rem, 2vw, 2.4rem); font-weight: 600; text-shadow: 1px 1px 2px #17477e; }
+.xp-password-label { display: block; margin-bottom: .4rem; font-size: 1.2rem; }
+.xp-password-entry { display: flex; align-items: stretch; height: 3.4rem; }
+.xp-password-entry input { flex: 1; min-width: 0; padding: .4rem .8rem; border: 2px inset #ddd; background: #fff; color: #222; font: 1.6rem Tahoma, sans-serif; user-select: text; }
+.xp-password-entry input:focus-visible { outline: 2px solid #ffe879; outline-offset: 2px; }
+.xp-password-entry button { flex: 0 0 3.8rem; border: 1px solid #144f9a; border-left: 0; background: linear-gradient(#fff,#d9e8fa); color: #174c92; font-size: 2rem; font-weight: 700; cursor: pointer; }
+.xp-password-entry button:focus-visible { outline: 2px solid #ffe879; outline-offset: 2px; }
+.xp-password-entry button:disabled, .xp-password-entry input:disabled { opacity: .72; cursor: wait; }
+.xp-login-error { margin-top: .5rem; color: #fff2aa; font-size: 1.15rem; line-height: 1.35; }
+@media (max-width: 760px), (max-height: 520px) {
+  .xp-account-login { width: min(100%, 38rem); padding: .4rem; gap: 1.2rem; }
+  .xp-account-avatar { flex-basis: clamp(6.4rem, 19vw, 9rem); width: clamp(6.4rem, 19vw, 9rem); height: clamp(6.4rem, 19vw, 9rem); }
+}
+@media (max-width: 380px) {
+  .xp-account-login { gap: .8rem; padding: 0; }
+  .xp-account-avatar { flex-basis: 6rem; width: 6rem; height: 6rem; }
+}
+</style>

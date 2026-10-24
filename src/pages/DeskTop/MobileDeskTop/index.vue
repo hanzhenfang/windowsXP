@@ -15,7 +15,7 @@ onMounted(() => play(audio.value))
 </script>
 
 <template>
-  <div class="xp-desktop xp-mobile-desktop" :style="{ backgroundImage: `url(${DeskBg})` }">
+  <div class="xp-desktop xp-mobile-desktop" :style="{ backgroundImage: store.wallpaper === 'bliss' ? `url(${DeskBg})` : 'none', backgroundColor: store.wallpaper === 'bliss' ? undefined : '#3a6ea5' }">
     <IconGroup mobile />
     <Transition name="xp-window-transition">
       <AppWindow v-if="store.activeWindow && !store.activeWindow.minimized" :key="store.activeWindow.id" :window="store.activeWindow" :mobile="true" />
