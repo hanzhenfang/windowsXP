@@ -36,7 +36,7 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-.xp-login-footer { left: 0; bottom: 0; min-height: clamp(8rem, 16vh, 12rem); padding: .8rem clamp(2rem, 5vw, 5rem); align-items: center; gap: 1rem; background: #00349b; }
+.xp-login-footer { left: 0; bottom: 0; min-height: clamp(8rem, 16vh, 12rem); padding: .8rem clamp(2rem, 5vw, 5rem); align-items: center; gap: 1rem; border-radius: 0; background: #00349b; }
 .xp-login-footer > .xp-footer-return { flex: 0 0 auto; display: flex; align-items: center; gap: .8rem; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
 .xp-footer-return:focus-visible { outline: 3px solid #ffe879; outline-offset: 3px; }
 .xp-footer-return:disabled { opacity: .65; cursor: wait; }

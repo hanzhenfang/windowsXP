@@ -168,8 +168,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.xp-login-screen { display: flex; flex-direction: column; height: 100vh; min-height: 42rem; overflow: hidden; padding: 13vh 0 16vh; background: #00349b; }
-.xp-login-frame { position: relative; flex: 1 1 auto; width: 100%; height: auto; min-width: 0; min-height: 0; padding: 0 clamp(1.2rem, 4vw, 5rem); border-block: 1px solid #91b2f2; background: radial-gradient(ellipse at 9% 12%, #8eacec 0, #6988d8 20%, #5b7bd0 68%, #5978ca 100%); }
+.xp-login-screen { display: flex; flex-direction: column; height: 100vh; min-height: 42rem; overflow: hidden; padding: 13vh 0 16vh; border-radius: 0; background: #00349b; }
+.xp-login-frame { position: relative; flex: 1 1 auto; width: 100%; height: auto; min-width: 0; min-height: 0; padding: 0 clamp(1.2rem, 4vw, 5rem); border-radius: 0; border-block: 1px solid #91b2f2; background: radial-gradient(ellipse at 9% 12%, #8eacec 0, #6988d8 20%, #5b7bd0 68%, #5978ca 100%); }
 .xp-login-brand { min-width: 0; min-height: 0; padding: 0 clamp(1rem, 3vw, 3rem) 0 0; }
 .xp-login-prompt { display: block; margin-top: 1.8rem; text-align: center; font-size: clamp(1.35rem, 1.8vw, 1.8rem); font-weight: 600; text-shadow: 0 1px 2px #254989; }
 .xp-login-divider { width: 2px; height: 82%; align-self: center; background: linear-gradient(transparent, #9bb8f3 12%, #9bb8f3 88%, transparent); }
